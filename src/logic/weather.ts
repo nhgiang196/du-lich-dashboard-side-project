@@ -1,0 +1,200 @@
+import { CLIMATE_YEARS, DAYS, LAT, LON, SLOTS, TZ } from "../data/tripData";
+import type { CloudScoreResult, DailyWeather, HourlyWeather, TimeSlot } from "../types";
+
+export function avg(arr: number[]): number | null {
+  return arr.length ? arr.reduce((x, y) => x + y, 0) / arr.length : null;
+}
+
+export function weatherIcon(code: number | null): string {
+  if (code == null) return "🌤️";
+  if (code === 0) return "☀️";
+  if (code <= 2) return "🌤️";
+  if (code === 3) return "☁️";
+  if (code === 45 || code === 48) return "🌫️";
+  if (code >= 51 && code <= 57) return "🌦️";
+  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return "🌧️";
+  if (code >= 95) return "⛈️";
+  return "🌥️";
+}
+
+export function cloudScore(day: DailyWeather | null | undefined): CloudScoreResult | null {
+  if (!day || !day.hours) return null;
+  const hs = [5, 6, 7].map((h) => day.hours?.[h]).filter((x): x is HourlyWeather => Boolean(x));
+  if (!hs.length) return null;
+
+  const hum = avg(hs.map((x) => x.rh).filter((v) => v != null));
+  const spread = avg(hs.map((x) => x.temp - x.dew).filter((v) => !Number.isNaN(v)));
+  const wind = avg(hs.map((x) => x.wind).filter((v) => v != null));
+  const rain = Math.max(...hs.map((x) => x.pp || 0));
+  const high = avg(hs.map((x) => x.chigh).filter((v) => v != null));
+
+  let sc = 0;
+  if (hum != null) sc += hum >= 90 ? 30 : hum >= 80 ? 20 : hum >= 70 ? 10 : 0;
+  if (spread != null) sc += spread <= 1.5 ? 25 : spread <= 3 ? 12 : 0;
+  if (wind != null) sc += wind <= 8 ? 20 : wind <= 15 ? 10 : 0;
+  sc += rain <= 20 ? 15 : rain <= 40 ? 7 : 0;
+  if (high != null) sc += high <= 50 ? 10 : 0;
+
+  return { score: sc, hum, spread, wind, rain, high };
+}
+
+export function cloudLabel(sc: number): [string, "good" | "" | "warn"] {
+  if (sc >= 70) return ["Khả năng cao", "good"];
+  if (sc >= 45) return ["Trung bình", ""];
+  return ["Thấp", "warn"];
+}
+
+export function findWeatherDay(days: DailyWeather[] | null, dayNum: number): DailyWeather | null {
+  if (!days) return null;
+  for (const d of days) {
+    if (Number(d.date.slice(8)) === dayNum) return d;
+  }
+  return null;
+}
+
+export function slotRain(
+  days: DailyWeather[] | null,
+  dayNum: number,
+  buoi: TimeSlot,
+): number | null {
+  const w = findWeatherDay(days, dayNum);
+  if (!w) return null;
+  const r = SLOTS[buoi];
+  if (w.hours && r) {
+    const vals: number[] = [];
+    for (let h = r[0]; h <= r[1]; h++) {
+      const hourData = w.hours[h];
+      if (hourData && hourData.pp != null) vals.push(hourData.pp);
+    }
+    if (vals.length) return Math.max(...vals);
+  }
+  return w.rainProb;
+}
+
+interface OpenMeteoForecastResponse {
+  daily?: {
+    time?: string[];
+    temperature_2m_max: (number | null)[];
+    temperature_2m_min: (number | null)[];
+    precipitation_sum: (number | null)[];
+    precipitation_probability_max: (number | null)[];
+    weathercode: (number | null)[];
+    sunrise: (string | null)[];
+    sunset: (string | null)[];
+  };
+  hourly?: {
+    time: string[];
+    temperature_2m: number[];
+    relative_humidity_2m: number[];
+    dew_point_2m: number[];
+    cloud_cover_high: number[];
+    wind_speed_10m: number[];
+    precipitation_probability: number[];
+  };
+}
+
+async function fetchJson<T>(url: string): Promise<T> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(String(res.status));
+  return res.json() as Promise<T>;
+}
+
+export async function loadForecast(): Promise<DailyWeather[]> {
+  const u = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,sunrise,sunset&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover_high,wind_speed_10m,precipitation_probability&timezone=${encodeURIComponent(TZ)}&start_date=${DAYS[0]}&end_date=${DAYS[3]}`;
+
+  const j = await fetchJson<OpenMeteoForecastResponse>(u);
+  const daily = j.daily;
+  const times = daily?.time;
+  if (!daily || !times || !times.length) {
+    throw new Error("none");
+  }
+  const H = j.hourly || {
+    time: [],
+    temperature_2m: [],
+    relative_humidity_2m: [],
+    dew_point_2m: [],
+    cloud_cover_high: [],
+    wind_speed_10m: [],
+    precipitation_probability: [],
+  };
+
+  return times.map((date, i) => {
+    const hours: Record<number, HourlyWeather> = {};
+    for (let k = 0; k < H.time.length; k++) {
+      const ts = H.time[k];
+      if (ts.slice(0, 10) === date) {
+        const hour = Number.parseInt(ts.slice(11, 13), 10);
+        hours[hour] = {
+          temp: H.temperature_2m[k],
+          rh: H.relative_humidity_2m[k],
+          dew: H.dew_point_2m[k],
+          chigh: H.cloud_cover_high[k],
+          wind: H.wind_speed_10m[k],
+          pp: H.precipitation_probability[k],
+        };
+      }
+    }
+    return {
+      date,
+      tmax: daily.temperature_2m_max[i],
+      tmin: daily.temperature_2m_min[i],
+      rain: daily.precipitation_sum[i],
+      rainProb: daily.precipitation_probability_max[i],
+      code: daily.weathercode[i],
+      sunrise: daily.sunrise[i],
+      sunset: daily.sunset[i],
+      hours,
+    };
+  });
+}
+
+export async function loadClimate(): Promise<{ years: number; days: DailyWeather[] }> {
+  const reqs = CLIMATE_YEARS.map((y) => {
+    const u = `https://archive-api.open-meteo.com/v1/archive?latitude=${LAT}&longitude=${LON}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,sunrise,sunset&timezone=${encodeURIComponent(TZ)}&start_date=${y}-11-16&end_date=${y}-11-19`;
+    return fetchJson<OpenMeteoForecastResponse>(u).catch(() => null);
+  });
+
+  const list = await Promise.all(reqs);
+  const ok = list.filter((x): x is OpenMeteoForecastResponse => Boolean(x));
+  if (!ok.length) throw new Error("none");
+
+  return {
+    years: ok.length,
+    days: DAYS.map((date, i) => {
+      const tx: number[] = [];
+      const tn: number[] = [];
+      const rn: number[] = [];
+      let wet = 0;
+      let sr: string | null = null;
+      let ss: string | null = null;
+
+      for (const j of ok) {
+        const d = j.daily;
+        if (!d || !d.time || d.time[i] == null) continue;
+        const maxVal = d.temperature_2m_max[i];
+        const minVal = d.temperature_2m_min[i];
+        const rainVal = d.precipitation_sum[i];
+        if (maxVal != null) tx.push(maxVal);
+        if (minVal != null) tn.push(minVal);
+        if (rainVal != null) {
+          rn.push(rainVal);
+          if (rainVal >= 1) wet++;
+        }
+        sr = d.sunrise[i];
+        ss = d.sunset[i];
+      }
+
+      return {
+        date,
+        tmax: avg(tx),
+        tmin: avg(tn),
+        rain: avg(rn),
+        rainProb: rn.length ? (wet / rn.length) * 100 : null,
+        code: null,
+        sunrise: sr,
+        sunset: ss,
+        hours: null,
+      };
+    }),
+  };
+}

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Đà Lạt 16-19/11/2026 · Dashboard</title>
+  </head>
+  <body>
+    <main>
+      <h1>Đà Lạt 16-19/11/2026</h1>
+      <p class="sub">
+        <span id="count"></span> · 2 người · xe Đà Lạt Ơi 22:30 tối 15/11 · thuê xe máy · 16-18/11
+        Faru Pine Woods Villa · 18-19/11 New Life Hotel
+      </p>
+
+      <div class="hero-3d-wrap" aria-label="Mô hình 3D đồi thông và biển mây Đà Lạt">
+        <div id="scene-canvas"></div>
+        <div class="hero-overlay">
+          <span class="badge">🌲 Đồi thông &amp; Biển mây 3D</span>
+          <button id="toggle-3d" type="button">Tạm dừng 3D</button>
+        </div>
+      </div>
+
+      <nav id="nav"></nav>
+      <section id="s-plan"></section>
+      <section id="s-weather" hidden></section>
+      <section id="s-outfit" hidden></section>
+      <section id="s-book" hidden></section>
+      <section id="s-cost" hidden></section>
+      <section id="s-alt" hidden></section>
+      <section id="s-todo" hidden></section>
+
+      <footer>
+        Thời tiết: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>.
+        Giá và đặt phòng lấy từ bảng đặt trước của bạn. Điểm săn mây là công thức đơn giản dựa trên
+        độ ẩm, gió, mây, không phải dự báo chính thức. Tick, giá nhập tay được lưu trong trình duyệt
+        này.
+      </footer>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

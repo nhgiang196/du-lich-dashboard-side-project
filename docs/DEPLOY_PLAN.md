@@ -1,6 +1,6 @@
 # Kế hoạch: dev environment + deploy GitHub + Vercel + CI/CD
 
-Trạng thái: **chưa triển khai** (repo mới clone, đang trống). Tài liệu này là bản bàn giao để session làm việc trong repo tiếp tục.
+Trạng thái: **đã triển khai code, CI và cấu hình Vercel** (cần người dùng kết nối tài khoản Vercel CLI / GitHub App ở bước cuối). Tài liệu này là bản bàn giao để session làm việc trong repo tiếp tục.
 
 ## Mục tiêu
 - Môi trường dev nhẹ, công nghệ mới, dễ tích hợp three.js về sau.
