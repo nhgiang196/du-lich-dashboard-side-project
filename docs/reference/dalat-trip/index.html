@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Đà Lạt 16-19/11</title>
+<style>
+:root{
+  --bg:#f4f7f5; --card:#ffffff; --text:#1c2a24; --muted:#5d6f66; --line:#dbe4df;
+  --accent:#2f7d5b; --warn:#b4540a; --chip:#e6f1ec; --warnbg:#fdebd9; --good:#1f7a4d; --goodbg:#dcf1e5;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#121a16; --card:#1b2621; --text:#e6efe9; --muted:#9bb0a5; --line:#2b3a33;
+    --accent:#5fc796; --warn:#f0a35e; --chip:#243730; --warnbg:#3a2a1a; --good:#7fdba8; --goodbg:#1f3a2c;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 56px}
+h1{font-size:1.5rem;margin:0}
+h2{font-size:1.05rem;margin:22px 0 8px}
+.sub{color:var(--muted);margin:2px 0 14px;font-size:.92rem}
+nav{display:flex;gap:6px;overflow-x:auto;padding:6px 0;margin-bottom:10px;position:sticky;top:0;background:var(--bg);z-index:5}
+nav button{white-space:nowrap}
+button,.btn{font:inherit;font-size:.9rem;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:5px 11px;cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,.btn:hover{border-color:var(--accent)}
+button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.badge{display:inline-block;background:var(--chip);color:var(--accent);padding:2px 9px;border-radius:999px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.badge.warn{background:var(--warnbg);color:var(--warn)}
+.badge.good{background:var(--goodbg);color:var(--good)}
+.badge.mute{background:var(--line);color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px;overflow-wrap:anywhere}
+.card.alert{border-color:var(--warn);background:var(--warnbg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.hint{color:var(--muted);font-size:.86rem}
+.row{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:.86rem;margin-top:3px}
+.day{margin:22px 0 8px}
+.day .h{font-weight:700;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.day .w{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center}
+.item{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;align-items:start}
+.item.done .t{opacity:.5;text-decoration:line-through}
+.item.opt{border-style:dashed}
+.time{color:var(--muted);font-size:.8rem}
+.t{font-weight:600}
+.meta{grid-column:2;font-size:.85rem;color:var(--muted)}
+.meta .pb{color:var(--warn)}
+.meta a,.card a{color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{text-align:left;padding:6px 5px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:.8rem}
+td.num,th.num{text-align:right;white-space:nowrap}
+.bar{height:12px;border-radius:999px;background:var(--chip);overflow:hidden;margin:8px 0}
+.bar>i{display:block;height:100%;background:var(--accent)}
+.bar.over>i{background:var(--warn)}
+input[type=range]{width:100%}
+input[type=number]{width:104px;font:inherit;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--text);text-align:right}
+select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--text)}
+.big{font-size:1.6rem;font-weight:700}
+.err{color:var(--warn)}
+section[hidden]{display:none}
+footer{color:var(--muted);font-size:.78rem;margin-top:26px}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Đà Lạt 16-19/11/2026</h1>
+  <p class="sub"><span id="count"></span> · 2 người · xe Đà Lạt Ơi 22:30 tối 15/11 · thuê xe máy · 16-18/11 Faru Pine Woods Villa · 18-19/11 New Life Hotel</p>
+  <nav id="nav"></nav>
+  <section id="s-plan"></section>
+  <section id="s-weather" hidden></section>
+  <section id="s-outfit" hidden></section>
+  <section id="s-book" hidden></section>
+  <section id="s-cost" hidden></section>
+  <section id="s-alt" hidden></section>
+  <section id="s-todo" hidden></section>
+  <footer>
+    Thời tiết: <a href="https://open-meteo.com/">Open-Meteo</a>. Giá và đặt phòng lấy từ bảng đặt trước của bạn. Điểm săn mây là công thức đơn giản dựa trên độ ẩm, gió, mây, không phải dự báo chính thức.
+    Tick, giá nhập tay được lưu trong trình duyệt này.
+  </footer>
+</main>
+
+<script>
+(function(){
+  var LAT = 11.94, LON = 108.44, TZ = "Asia/Ho_Chi_Minh";
+  var DAYS = ["2026-11-16","2026-11-17","2026-11-18","2026-11-19"];
+  var CLIMATE_YEARS = [2018,2019,2020,2021,2022,2023,2024,2025];
+  var DOW = ["Chủ nhật","Thứ hai","Thứ ba","Thứ tư","Thứ năm","Thứ sáu","Thứ bảy"];
+  var $ = function(id){ return document.getElementById(id); };
+
+  // d ngày, b buổi, t giờ, a hoạt động, c loại, p địa điểm, w phụ thuộc thời tiết, pb Plan B, m giá của riêng mục (nếu có), n ghi chú, o tuỳ chọn
+  var PLAN_BASE = [
+    {d:15,b:"Tối",t:"22:30",a:"Lên xe Đà Lạt Ơi khứ hồi, khởi hành từ Công viên Thanh Lễ (Thủ Dầu Một)",c:"Di chuyển",p:"Công viên Thanh Lễ Thủ Dầu Một",n:"Vé xe đã đặt, đã tính trong chi phí."},
+    {d:16,b:"Sáng",t:"04:00",a:"Đến Đà Lạt",c:"Di chuyển",p:"Văn phòng xe Đà Lạt Ơi Phạm Hồng Thái",n:"Trung chuyển vào 2 Đường Khởi Nghĩa Bắc Sơn, Xuân Hương."},
+    {d:16,b:"Sáng",t:"08:00",a:"Gửi hành lý, nhận phòng sớm từ 8h ở villa",c:"Nghỉ ngơi",p:"Faru Pine Woods Villa Đà Lạt",n:"Chưa có xe máy nên đi bộ từ đường lớn vào khoảng 3 phút. Cần báo khách sạn nhận phòng sớm (chưa báo). Từ 4h đến 8h chưa có phòng: ngồi cà phê mở sớm hoặc gửi hành lý trước."},
+    {d:16,b:"Sáng",a:"Nhận xe máy thuê, đi ăn sáng",c:"Ăn uống",p:"Bánh mì xíu mại Vân Đà Lạt",n:"Xe máy chưa đặt, xem tab Đặt trước."},
+    {d:16,b:"Sáng",a:"Hồ Xuân Hương, Quảng trường Lâm Viên",c:"Tham quan",p:"Hồ Xuân Hương Đà Lạt",w:1,pb:"Cà phê trong nhà gần chợ Đà Lạt",n:"Gửi xe Go."},
+    {d:16,b:"Sáng",a:"Chợ Đà Lạt: khu chụp hình sống ảo Hong Kong",c:"Tham quan",p:"Khu chụp hình sống ảo Hong Kong Chợ Đà Lạt",w:1,pb:"Dạo trong chợ, ăn vặt dưới mái",n:"Chụp ảnh chỗ cây cầu, bên hông chợ."},
+    {d:16,b:"Trưa",a:"Thuê máy ảnh cho ngày mai nếu cần chụp nhiều",c:"Mua sắm",p:"Hạ Camera Cho thuê máy ảnh Đà Lạt",m:350000,o:1,n:"Tuỳ chọn. Fujifilm X-T20 thuê 1-2 ngày, 350k là ước tính của bạn."},
+    {d:16,b:"Trưa",a:"Ăn trưa, về khách sạn nghỉ ngơi",c:"Ăn uống",p:"Liên Bánh Ướt Lòng Gà 44 Tăng Bạt Hổ"},
+    {d:16,b:"Chiều",a:"Tham quan nhà thờ Mai Anh (Domaine de Marie)",c:"Tham quan",p:"Nhà thờ Mai Anh Domaine de Marie",w:1,pb:"Cà phê trong nhà, nghỉ ở villa",n:"Có thể có phí vào cổng, kiểm tra khi tới."},
+    {d:16,b:"Chiều",a:"Dạo bộ quanh trung tâm đón hoàng hôn",c:"Tham quan",p:"Dốc Sương Nguyệt Ánh Đà Lạt",w:1,pb:"Cà phê có mái view hồ",n:"Điểm ngắm hoàng hôn khác: Hồ Xuân Hương."},
+    {d:16,b:"Tối",a:"Ăn tối lẩu mực lá é",c:"Ăn uống",p:"Lẩu Mực Lá É Nẫu Ơi Đà Lạt",n:"Ngon hơn lẩu gà lá é."},
+    {d:16,b:"Tối",a:"Chợ đêm: Ấm Sữa Gạo Đà Lạt, khô bò nướng Hòa Bình, mua sắm",c:"Ăn uống",p:"Chợ Đêm Đà Lạt",w:1,pb:"Quán ăn vặt có mái, về nghỉ sớm"},
+
+    {d:17,b:"Sáng",a:"Thức sớm săn mây Cầu Đất, ăn sáng",c:"Săn mây",p:"Đồi Chè Cầu Đất",w:1,pb:"Ngủ tiếp, ăn sáng muộn, dời săn mây sang sáng 18/11 nếu điểm săn mây cao hơn",n:"Chọn một: Săn Mây Cầu Gỗ - Bình Minh hoặc Săn Mây Nhà Gỗ Cầu Đất. Mang áo ấm và găng tay, đường sáng sớm trơn."},
+    {d:17,b:"Sáng",a:"Về ga Đà Lạt, đi tàu ra ga Trại Mát và khứ hồi về ga",c:"Tham quan",p:"Ga Đà Lạt",w:1,pb:"Đổi sang quán cà phê trong nhà",m:300000,n:"Vé khứ hồi khoảng 300k theo bảng của bạn, không cần đặt trước. Kiểm tra giờ tàu."},
+    {d:17,b:"Trưa",a:"Ăn trưa local",c:"Ăn uống",p:"Bánh căn Lệ Đà Lạt"},
+    {d:17,b:"Trưa",a:"Kem thủ công",c:"Ăn uống",p:"Dalato Tiệm kem thủ công Đà Lạt"},
+    {d:17,b:"Trưa",a:"Nghỉ ngắn ở villa",c:"Nghỉ ngơi",p:"Faru Pine Woods Villa Đà Lạt"},
+    {d:17,b:"Chiều",a:"Ăn tối, đón hoàng hôn ở quán có tàu lửa chạy ngang",c:"Ăn uống",p:"Tiệm Nướng Trạm Dừng Chill Đà Lạt",w:1,pb:"Giữ quán nếu có chỗ ngồi trong nhà, hoặc đổi sang quán nướng khác",m:600000,n:"Cần đặt chỗ trước (chưa đặt). Ước tính 600k."},
+    {d:17,b:"Tối",a:"Cà phê chill",c:"Cà phê",p:"Lời Của Gió Đà Lạt",w:1,pb:"Ở lại chỗ có mái che"},
+
+    {d:18,b:"Sáng",a:"Ăn sáng local siêu sớm",c:"Ăn uống",p:"Chợ Đà Lạt"},
+    {d:18,b:"Sáng",a:"Đón bình minh",c:"Săn mây",p:"Viewpoint săn mây Đồi Đa Phú",w:1,pb:"Ngủ thêm, bỏ mục này"},
+    {d:18,b:"Sáng",a:"Tham quan Scientific Research Institute of Highland",c:"Tham quan",p:"Scientific Research Institute of Highland Đà Lạt",n:"Kiểm tra giờ mở cửa và vé."},
+    {d:18,b:"Sáng",a:"Cà phê tiếp",c:"Cà phê",p:"Tiệm Cà Phê Trứng Cô Ba Đà Lạt"},
+    {d:18,b:"Trưa",a:"Dọn đồ chuẩn bị, tiện đi ăn trưa",c:"Ăn uống",p:"Cơm Nhà Thông Đà Lạt"},
+    {d:18,b:"Trưa",t:"12:00",a:"Nhận phòng New Life Hotel sớm từ 12h trưa",c:"Di chuyển",p:"New Life Hotel Đà Lạt",n:"Cần báo khách sạn nhận phòng sớm (chưa báo). Đổi khách sạn cho tiện đường đón xe về."},
+    {d:18,b:"Chiều",a:"Nghỉ ngơi tại khách sạn, đón hoàng hôn",c:"Nghỉ ngơi",p:"New Life Hotel Đà Lạt"},
+    {d:18,b:"Tối",a:"Đi nhậu",c:"Ăn uống",p:"",n:"Chưa chọn quán."},
+
+    {d:19,b:"Sáng",a:"Ăn sáng tại khách sạn, mua đặc sản (mứt, trà atiso, cà phê, hồng sấy), cà phê thong thả",c:"Mua sắm",p:"Quoà Đặc Sản Đà Lạt"},
+    {d:19,b:"Sáng",a:"Ghé chợ mới Đà Lạt, lái xe dạo cho hết xăng",c:"Tham quan",p:"Dalat Center"},
+    {d:19,b:"Trưa",a:"Trả phòng trước 12:00, trả xe máy",c:"Di chuyển",p:"New Life Hotel Đà Lạt"},
+    {d:19,b:"Chiều",a:"Lên xe về nhà",c:"Di chuyển",p:"",n:"Vé khứ hồi đã đặt. Giờ xe về chưa ghi trong bảng, hỏi nhà xe giờ và điểm đón."}
+  ];
+
+  // Phương án đổi: Đồi Đa Phú sáng 17/11, Cầu Đất sáng 18/11 (ngày đổi khách sạn)
+  var SWAP17 = [
+    {d:17,b:"Sáng",t:"05:15",a:"Đón bình minh, săn mây Đồi Đa Phú",c:"Săn mây",p:"Viewpoint săn mây Đồi Đa Phú Đà Lạt",w:1,pb:"Ngủ tiếp, thử lại sáng 18/11 ở Cầu Đất",n:"Gần trung tâm hơn Cầu Đất, đi muộn hơn khoảng 30 phút. Hợp sau đêm ngủ trên xe. Mang áo ấm và găng tay."},
+    {d:17,b:"Sáng",t:"07:00",a:"Ăn sáng local siêu sớm",c:"Ăn uống",p:"Chợ Đà Lạt"},
+    {d:17,b:"Sáng",t:"08:30",a:"Tham quan Scientific Research Institute of Highland",c:"Tham quan",p:"Scientific Research Institute of Highland Đà Lạt",n:"Kiểm tra giờ mở cửa và vé."},
+    {d:17,b:"Sáng",a:"Về ga Đà Lạt, đi tàu ra ga Trại Mát và khứ hồi về ga",c:"Tham quan",p:"Ga Đà Lạt",w:1,pb:"Đổi sang quán cà phê trong nhà",m:300000,n:"Vé khứ hồi khoảng 300k, không cần đặt trước. Kiểm tra giờ tàu, chọn chuyến sau khi xong Viện, hoặc dời sang chiều."},
+    {d:17,b:"Trưa",a:"Ăn trưa local",c:"Ăn uống",p:"Bánh căn Lệ Đà Lạt"},
+    {d:17,b:"Trưa",a:"Kem thủ công",c:"Ăn uống",p:"Dalato Tiệm kem thủ công Đà Lạt"},
+    {d:17,b:"Trưa",a:"Nghỉ ngắn ở villa",c:"Nghỉ ngơi",p:"Faru Pine Woods Villa Đà Lạt"},
+    {d:17,b:"Chiều",a:"Ăn tối, đón hoàng hôn ở quán có tàu lửa chạy ngang",c:"Ăn uống",p:"Tiệm Nướng Trạm Dừng Chill Đà Lạt",w:1,pb:"Giữ quán nếu có chỗ ngồi trong nhà, hoặc đổi sang quán nướng khác",m:600000,n:"Cần đặt chỗ trước (chưa đặt). Ước tính 600k."},
+    {d:17,b:"Tối",a:"Cà phê chill",c:"Cà phê",p:"Lời Của Gió Đà Lạt",w:1,pb:"Ở lại chỗ có mái che"}
+  ];
+  var SWAP18 = [
+    {d:18,b:"Sáng",t:"04:30",a:"Thức sớm săn mây Cầu Đất, ăn sáng",c:"Săn mây",p:"Đồi Chè Cầu Đất",w:1,pb:"Ngủ tiếp, bỏ mục này và nhận phòng sớm hơn",n:"Chọn một: Săn Mây Cầu Gỗ - Bình Minh hoặc Săn Mây Nhà Gỗ Cầu Đất. Cách trung tâm khoảng 25-30 km. Phải về kịp trả phòng trước 12:00."},
+    {d:18,b:"Sáng",t:"09:30",a:"Về villa dọn đồ, trả phòng Faru trước 12:00",c:"Di chuyển",p:"Faru Pine Woods Villa Đà Lạt",n:"Đã bỏ Viện nghiên cứu khỏi sáng 18/11 (chuyển sang 17/11) để kịp trả phòng."},
+    {d:18,b:"Sáng",t:"10:30",a:"Cà phê trứng",c:"Cà phê",p:"Tiệm Cà Phê Trứng Cô Ba Đà Lạt"},
+    {d:18,b:"Trưa",t:"12:00",a:"Nhận phòng New Life Hotel sớm từ 12h trưa, gửi hành lý",c:"Di chuyển",p:"New Life Hotel Đà Lạt",n:"Cần báo khách sạn nhận phòng sớm (chưa báo). Đổi khách sạn cho tiện đường đón xe về."},
+    {d:18,b:"Trưa",a:"Ăn trưa",c:"Ăn uống",p:"Cơm Nhà Thông Đà Lạt"},
+    {d:18,b:"Chiều",a:"Nghỉ ngơi tại khách sạn, đón hoàng hôn",c:"Nghỉ ngơi",p:"New Life Hotel Đà Lạt"},
+    {d:18,b:"Tối",a:"Đi nhậu",c:"Ăn uống",p:"",n:"Chưa chọn quán."}
+  ];
+  var PLAN = PLAN_BASE;
+  function buildPlan(){
+    PLAN = state.variant === "swap"
+      ? PLAN_BASE.filter(function(p){ return p.d < 17; }).concat(SWAP17, SWAP18, PLAN_BASE.filter(function(p){ return p.d > 18; }))
+      : PLAN_BASE;
+  }
+  function pk(p){ return p.d + "|" + p.b + "|" + p.a; }
+
+  // Đặt trước: st = done (Đã đặt), todo (Chưa hoàn thành), cancel (Hủy), none (Không cần đặt trước)
+  var BOOK = [
+    {n:"Báo nhận phòng sớm ngày 16/11", st:"todo", info:"Nhận phòng sớm từ 8h sáng 16/11."},
+    {n:"Báo nhận phòng sớm ngày 18/11", st:"todo", info:"Nhận phòng sớm từ 12h trưa 18/11 (New Life Hotel)."},
+    {n:"Xe máy thuê", st:"todo", info:"Tiệm trên TikTok:", link:"https://www.tiktok.com/@thuexemay.dalat/photo/7680781244845559048", est:480000},
+    {n:"Thuê máy ảnh 1 ngày (tuỳ chọn)", st:"todo", info:"Hạ Camera - Cho thuê máy ảnh Đà Lạt.", est:350000},
+    {n:"Đặt chỗ ăn tối ngày 2 (17/11)", st:"todo", info:"Tiệm Nướng Trạm Dừng Chill.", est:600000},
+    {n:"Faru Pine Woods Villa Đà Lạt", st:"done", date:"01/11/2026", info:"16-18/11. 1 x Garden View Room - King Bed, view sân vườn, 33 m², 1 giường super king. Đã chốt ở đây.", real:873000},
+    {n:"New Life Hotel Đà Lạt", st:"done", date:"01/11/2026", info:"18-19/11. 1 x Premier Double, view thành phố, 25 m², không hút thuốc, 1 giường đôi.", real:919000},
+    {n:"Xe khách khứ hồi, xe Đà Lạt Ơi", st:"done", date:"01/11/2026", info:"Khởi hành 22:30 từ Công viên Thanh Lễ, Thủ Dầu Một.", real:1200000},
+    {n:"Tala Dalat Hotel", st:"cancel", date:"17/10/2026", info:"16-18/11. 1 x Suite with Balcony, view thành phố, 25 m², 1 giường queen. Đã chốt Faru thay thế, mục \"hủy khách sạn còn lại\" trong checklist đã xong. Giá lúc đặt 782k."},
+    {n:"Amory Stillus Collection Dalat", st:"cancel", date:"17/10/2026", info:"18-19/11. Premier Double Balcony and City View."},
+    {n:"New Century Dalat Hotel", st:"cancel", date:"01/11/2026", info:"18-19/11. Superior giường đôi ban công, view vườn."}
+  ];
+
+  // Dòng chi phí: g = loại, day = ngày (nếu có), v = số mặc định (null = chưa nhập), opt = tuỳ chọn, hotel = tala | faru (chỉ tính khi được chọn)
+  var LINES = [
+    {id:"faru", n:"Faru Pine Woods Villa, 16-18/11 (2 đêm)", g:"Đã đặt", v:873000},
+    {id:"newlife", n:"New Life Hotel, 18-19/11", g:"Đã đặt", v:919000},
+    {id:"bus", n:"Xe khách khứ hồi Đà Lạt Ơi", g:"Đã đặt", v:1200000},
+    {id:"moto", n:"Thuê xe máy", g:"Ước tính", v:480000},
+    {id:"fuel", n:"Đổ xăng xe máy", g:"Ước tính", v:180000},
+    {id:"train", n:"Vé tàu lửa khứ hồi (17/11)", g:"Ước tính", v:300000, day:17},
+    {id:"cam", n:"Thuê máy ảnh (tuỳ chọn)", g:"Ước tính", v:350000, opt:1},
+    {id:"m16a", n:"Ăn sáng + trưa 16/11", g:"Ăn uống", v:150000, day:16},
+    {id:"m16b", n:"Ăn tối 16/11", g:"Ăn uống", v:500000, day:16},
+    {id:"m17a", n:"Ăn sáng + trưa 17/11", g:"Ăn uống", v:150000, day:17},
+    {id:"m17b", n:"Ăn tối 17/11 (Trạm Dừng Chill)", g:"Ăn uống", v:600000, day:17},
+    {id:"m18a", n:"Ăn sáng + trưa 18/11", g:"Ăn uống", v:300000, day:18},
+    {id:"m18b", n:"Ăn tối 18/11", g:"Ăn uống", v:500000, day:18},
+    {id:"m19", n:"Ăn uống và mua đặc sản 19/11", g:"Ăn uống", v:null, day:19, s:"Chưa có trong bảng của bạn, nhập nếu muốn tính"}
+  ];
+
+  var ALT = [
+    ["Săn mây","Cầu Đất (Cầu Gỗ Bình Minh hoặc Nhà Gỗ)","Đẹp hơn nhưng xa, đường đèo tối và có sương, cần đèn xe tốt."],
+    ["Săn mây","Đồi Đa Phú","Gần trung tâm hơn, chạy xe ngắn và an toàn hơn."],
+    ["Săn mây","Cà phê ngắm bình minh trong thành phố","Khi dự báo mưa hoặc ngại chạy xe sớm. Không có biển mây."],
+    ["Khi mưa","Crazy House","Gần trung tâm."],
+    ["Khi mưa","Dinh I Bảo Đại","Mở theo giờ hành chính, kiểm tra trước."],
+    ["Khi mưa","Quán cà phê có mái, đọc sách","Khi mệt hoặc mưa kéo dài."],
+    ["Lịch tổng","Dời săn mây Cầu Đất sang 18/11","Nếu sáng 17/11 mưa hoặc điểm săn mây thấp hơn sáng 18/11 (xem tab Thời tiết)."],
+    ["Lịch tổng","Xe đến muộn hơn 4h sáng","Gửi hành lý rồi ăn sáng trước, nhận phòng sớm từ 8h vẫn giữ."]
+  ];
+
+  var PALETTE = [["Kem","#efe6d2"],["Be","#d8c3a5"],["Nâu cà phê","#6b4a2f"],["Xám khói","#8a8f93"],["Xanh rêu","#5b6b3a"],["Đỏ gạch","#b5523b"],["Mustard","#d6a21e"],["Cobalt","#2c4fa8"]];
+  var RULES = [
+    "Mặc 3 lớp: lớp trong thoáng (áo thun, sơ mi), lớp giữa len hoặc cardigan, lớp ngoài chắn gió. Trưa nóng thì cởi lớp giữa.",
+    "Tông chính kem, be, nâu cà phê, xám khói, xanh rêu. Thêm một món màu mạnh (đỏ gạch, mustard, cobalt) làm điểm nhấn cho ảnh.",
+    "Săn mây và đồi chè nền xanh xám nên mặc màu sáng hoặc đỏ gạch. Hồ Xuân Hương và nhà thờ Mai Anh hợp tông nâu be retro.",
+    "Áo khoác da chỉ mặc khi tạnh, hoặc phủ áo mưa ngoài. Mang một lớp ngoài chống nước gọn.",
+    "Khi lái xe máy đi giày kín. Mule và dép chỉ dùng đi bộ, ở khách sạn, sau khi trả xe."
+  ];
+  // d ngày, b buổi, re (tuỳ chọn) khớp với tên hoạt động hoặc địa điểm, slot nhãn hiển thị; mục khớp đầu tiên được dùng
+  var OUTFIT = [
+    {d:15,b:"Tối",slot:"Tối 15/11, lên xe khách",me:"Đồ thoải mái, mang sẵn áo khoác",you:"Đồ rộng, cardigan hoặc hoodie, tất ấm"},
+    {d:16,b:"Sáng",re:/Đến Đà Lạt/,slot:"Sáng 16/11, 4h mới đến",me:"Áo khoác da nâu, quần xám, giày thể thao",you:"Cardigan len + áo thun, quần ống rộng, khăn mỏng"},
+    {d:16,b:"Sáng",slot:"Sáng 16/11, nhận xe, hồ, chợ",me:"Giữ bộ trên, cởi bớt lớp khi nắng lên. Đi giày kín khi lái xe",you:"Baby tee hoặc sơ mi kem, vest len hoặc bomber, jean baggy, sneaker"},
+    {d:16,b:"Chiều",re:/nhà thờ|Mai Anh/,slot:"Chiều 16/11, nhà thờ Mai Anh",me:"Sơ mi đen li, quần xám, giày thể thao",you:"Váy midi hoa nhí hoặc áo len be, giày Mary Jane hoặc sneaker, túi đeo chéo"},
+    {d:16,b:"Chiều",slot:"Chiều 16/11, hoàng hôn",me:"Sơ mi đen li, quần xám, khoác da nâu. Dép mule da nếu không mưa",you:"Áo len, beret hoặc mũ len, khăn"},
+    {d:16,b:"Tối",slot:"Tối 16/11, lẩu mực, chợ đêm",me:"Thêm lớp ấm, mang áo mưa gọn",you:"Áo khoác dày hơn, tông tối hoặc nâu"},
+    {d:17,b:"Sáng",re:/săn mây|Đa Phú|Cầu Đất|bình minh/,slot:"Sáng sớm săn mây (17/11)",me:"Áo sáng bên trong, khoác da nâu hoặc bomber chắn gió, găng tay, giày kín",you:"Áo sáng hoặc đỏ gạch nổi trên nền xanh, hai lớp, quần dài, giày kín, găng tay"},
+    {d:17,b:"Sáng",re:/tàu|Trại Mát/,slot:"Sáng 17/11, tàu Trại Mát",me:"Áo khoác da nâu, đồ sáng",you:"Style vintage: áo len dệt, quần ống rộng, mũ, khăn"},
+    {d:17,b:"Sáng",slot:"Sáng 17/11, sau săn mây",me:"Giữ bộ săn mây, cởi lớp khi nắng lên",you:"Giữ bộ săn mây, cởi lớp khi nắng lên"},
+    {d:17,b:"Chiều",slot:"Chiều tối 17/11, nướng ngoại ô",me:"Áo khoác da đen dây kéo, đồ tối màu. Quán trên đồi lạnh",you:"Áo khoác dày, quần dài, đồ tối giặt được (có mùi nướng)"},
+    {d:17,b:"Tối",slot:"Tối 17/11, cà phê Lời Của Gió",me:"Áo khoác da đen, áo quần tối màu",you:"Tông nâu hoặc đen, cardigan hoặc blazer nhẹ, boots thấp"},
+    {d:18,b:"Sáng",re:/săn mây|Đa Phú|Cầu Đất|bình minh/,slot:"Sáng sớm săn mây (18/11)",me:"Như sáng săn mây 17/11",you:"Như sáng săn mây 17/11"},
+    {d:18,b:"Sáng",slot:"Sáng 18/11, cà phê, dọn đồ",me:"Free, gọn nhẹ để kéo hành lý",you:"Thoải mái, giày thể thao"},
+    {d:18,b:"Trưa",slot:"Trưa 18/11, ăn trưa, đổi khách sạn",me:"Free",you:"Thoải mái, giày thể thao"},
+    {d:18,b:"Tối",slot:"Tối 18/11, đi nhậu",me:"Free, tối màu, ấm",you:"Free, ấm"},
+    {d:19,b:"Sáng",slot:"Sáng 19/11, chợ mới, mua quà",me:"Áo khoác da nâu. Đi giày kín khi lái xe, để mule sau khi trả xe",you:"Free, áo ấm mỏng"},
+    {d:19,b:"Trưa",slot:"Trưa 19/11, trả phòng, ra bến xe",me:"Đồ rộng thoải mái, mang sẵn áo khoác",you:"Đồ rộng thoải mái, tất ấm"},
+    {d:19,b:"Chiều",slot:"Chiều 19/11, xe về",me:"Đồ rộng thoải mái, mang sẵn áo khoác",you:"Đồ rộng thoải mái, tất ấm"}
+  ];
+  // Nền địa điểm dùng để kiểm tra độ nổi của màu
+  var BGS = [{n:"Xanh đồi chè",c:"#4f7a45"},{n:"Xám sương",c:"#b9c0c4"},{n:"Xanh thông",c:"#3f5a3a"},{n:"Nâu gỗ quán",c:"#5a4030"},{n:"Đêm",c:"#1a1d24"},{n:"Trong nhà",c:"#d9cdb8"}];
+  function bgBy(n){ for (var i = 0; i < BGS.length; i++) if (BGS[i].n === n) return BGS[i]; return BGS[0]; }
+  // main = màu dễ thấy nhất của mỗi người, dùng để chấm độ nổi so với nền
+  var COUPLE = [
+    {id:"tonal",name:"Tonal nâu be",when:"16/11: Hồ Xuân Hương, nhà thờ Mai Anh, chợ",
+      you:{top:"#1c1c1c",bottom:"#8a8f93",outer:"#6b4a2f",main:"#6b4a2f"},partner:{top:"#d8c3a5",bottom:"#efe6d2",outer:"#7a5a3a",main:"#d8c3a5"},
+      shared:{n:"Khăn nâu cà phê",c:"#5a3d27"},bg:["Xanh thông","Trong nhà"],
+      tip:"Cùng họ nâu be nhưng khác độ sáng: một người tối (đen, nâu), một người sáng (be, kem). Khăn chung nối hai bộ lại. Nền xanh thông dễ nuốt tông nâu tối của bạn, chụp trước tường kem hoặc mặt hồ sáng sẽ nổi hơn."},
+    {id:"bright",name:"Sáng và nổi",when:"Sáng sớm săn mây (Cầu Đất, Đa Phú) và tàu Trại Mát",
+      you:{top:"#efe6d2",bottom:"#5a5f63",outer:"#8a8f93",main:"#efe6d2"},partner:{top:"#b5523b",bottom:"#d8c3a5",outer:"#efe6d2",main:"#b5523b"},
+      shared:{n:"Găng tay xám khói",c:"#8a8f93"},bg:["Xanh đồi chè","Xám sương"],
+      tip:"Một người màu nhấn mạnh (đỏ gạch hoặc mustard), người kia kem trung tính để không tranh nhau. Tránh xanh lá và xám đậm vì chìm vào nền đồi chè."},
+    {id:"dark",name:"Dark leather",when:"Tối 17/11: nướng ngoại ô, cà phê Lời Của Gió",
+      you:{top:"#1c1c1c",bottom:"#2b2b2b",outer:"#161616",main:"#161616"},partner:{top:"#efe6d2",bottom:"#3a2f28",outer:"#6b4a2f",main:"#6b4a2f"},
+      shared:{n:"Mũ len đen",c:"#161616"},bg:["Nâu gỗ quán","Đêm"],
+      tip:"Hai người cùng áo da nhưng một đen một nâu. Người đi cùng mặc áo kem bên trong làm điểm sáng, vì đồ toàn đen dễ chìm trong ảnh tối."},
+    {id:"chill",name:"Chill nhẹ",when:"18/11: cà phê, đổi khách sạn, đi nhậu",
+      you:{top:"#8a8f93",bottom:"#6b4a2f",outer:"#5a5f63",main:"#8a8f93"},partner:{top:"#efe6d2",bottom:"#d8c3a5",outer:"#d8c3a5",main:"#efe6d2"},
+      shared:null,bg:["Trong nhà"],
+      tip:"Ngày ít chụp ảnh nên mặc theo cảm giác, chỉ giữ tông xám nâu và kem để vẫn hợp nhau."},
+    {id:"comfy",name:"Đồng bộ thoải mái",when:"15/11 lên xe, 4h sáng 16/11 mới đến, 19/11 xe về",
+      you:{top:"#8a8f93",bottom:"#8a8f93",outer:"#5b6b3a",main:"#8a8f93"},partner:{top:"#d8c3a5",bottom:"#d8c3a5",outer:"#5b6b3a",main:"#d8c3a5"},
+      shared:{n:"Tất hoặc mũ xanh rêu",c:"#5b6b3a"},bg:["Trong nhà"],
+      tip:"Đồ rộng tông trung tính, cùng một áo khoác xanh rêu làm điểm chung. Quan trọng nhất là ấm và dễ ngủ trên xe."}
+  ];
+  var PACK = [
+    "Áo khoác chắn gió hoặc mưa gọn","Áo mưa cho hai người","Găng tay","Khăn hoặc buff","Tất ấm",
+    "Giày kín cho xe máy","Mule hoặc dép cho đi bộ","Mũ len hoặc beret","Kính","Túi đeo chéo chống nước","Túi nilon cho đồ ướt","Sạc dự phòng"
+  ];
+
+  var TODO = [
+    ["Quyết định giữ Tala hay Faru cho 16-18/11, hủy khách sạn còn lại trước hạn hủy miễn phí","Quan trọng"],
+    ["Kiểm tra Amory và New Century đã hủy hẳn, không bị tính phí","Quan trọng"],
+    ["Hỏi nhà xe Đà Lạt Ơi giờ xe về 19/11 và điểm đón","Đặt trước"],
+    ["Giấy phép lái xe và CCCD","Giấy tờ"],
+    ["Mũ bảo hiểm (hoặc chắc tiệm xe cho mượn)","Đồ mang"],
+    ["Áo ấm, găng tay cho buổi săn mây","Đồ mang"],
+    ["Áo mưa","Đồ mang"],
+    ["Sạc dự phòng, giá đỡ điện thoại cho xe máy","Đồ mang"],
+    ["Thuốc say xe, thuốc cá nhân","Đồ mang"],
+    ["Tải bản đồ offline khu vực Đà Lạt","Chuẩn bị"],
+    ["Tiền mặt cho quán nhỏ và gửi xe","Chuẩn bị"]
+  ];
+
+  var state = { done:{}, todo:{}, pack:{}, thr:60, val:{}, on:{}, keep:"faru", variant:"base" };
+  var KEY = "dalat-trip-v7";
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+  var s0 = null;
+  try{ s0 = JSON.parse(localStorage.getItem(KEY)); }catch(e){}
+  if (s0){ state.done=s0.done||{}; state.todo=s0.todo||{}; state.pack=s0.pack||{}; state.thr=s0.thr||60; state.val=s0.val||{}; state.on=s0.on||{}; state.keep=s0.keep||"faru"; state.variant=s0.variant||"base"; }
+  else { TODO.forEach(function(_, i){ state.todo[i] = true; }); }
+  buildPlan();
+
+  function vnd(n){ return Math.round(n).toLocaleString("vi-VN") + " đ"; }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  function q(loc){ return /Đà Lạt|Dalat|Da Lat|Thủ Dầu Một/i.test(loc) ? loc : loc + " Đà Lạt"; }
+  function mapUrl(loc){ return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q(loc)); }
+  function icon(code){
+    if (code == null) return "🌤️"; if (code === 0) return "☀️"; if (code <= 2) return "🌤️"; if (code === 3) return "☁️";
+    if (code === 45 || code === 48) return "🌫️"; if (code >= 51 && code <= 57) return "🌦️";
+    if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return "🌧️"; if (code >= 95) return "⛈️"; return "🌥️";
+  }
+  function fmt(iso){ var d = new Date(iso + "T00:00:00"); return { day: d.getDate() + "/" + (d.getMonth()+1), dow: DOW[d.getDay()] }; }
+  function hhmm(s){ return s ? s.slice(11,16) : "–"; }
+  function r0(x){ return x == null ? "–" : Math.round(x); }
+  function avg(a){ return a.length ? a.reduce(function(x,y){return x+y;},0)/a.length : null; }
+  function fetchJson(u){ return fetch(u).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); }); }
+
+  var weather = { days:null, label:"Đang tải…", forecast:false, note:"", err:"" };
+  function wDay(num){ if(!weather.days) return null; for(var i=0;i<weather.days.length;i++) if(+weather.days[i].date.slice(8)===num) return weather.days[i]; return null; }
+
+  var TABS = [["plan","Lịch trình"],["weather","Thời tiết"],["outfit","Ăn mặc"],["book","Đặt trước"],["cost","Chi phí"],["alt","Phương án"],["todo","Checklist"]];
+  var nav = $("nav");
+  TABS.forEach(function(t){
+    var b = document.createElement("button"); b.textContent = t[1]; b.dataset.t = t[0];
+    b.addEventListener("click", function(){ show(t[0]); });
+    nav.appendChild(b);
+  });
+  function show(id){
+    TABS.forEach(function(t){ $("s-"+t[0]).hidden = t[0] !== id; });
+    Array.prototype.forEach.call(nav.children, function(b){ b.className = b.dataset.t === id ? "on" : ""; });
+    try{ history.replaceState(null,"","#"+id); }catch(e){}
+  }
+  var left = Math.ceil((new Date("2026-11-16T00:00:00") - new Date()) / 86400000);
+  $("count").textContent = left > 0 ? "Còn " + left + " ngày" : (left > -4 ? "Đang trong chuyến đi" : "Chuyến đi đã qua");
+
+  // ---------- Điểm săn mây
+  function cloudScore(day){
+    if (!day || !day.hours) return null;
+    var hs = [5,6,7].map(function(h){ return day.hours[h]; }).filter(Boolean);
+    if (!hs.length) return null;
+    var hum = avg(hs.map(function(x){return x.rh;}).filter(function(v){return v!=null;}));
+    var spread = avg(hs.map(function(x){return x.temp - x.dew;}).filter(function(v){return !isNaN(v);}));
+    var wind = avg(hs.map(function(x){return x.wind;}).filter(function(v){return v!=null;}));
+    var rain = Math.max.apply(null, hs.map(function(x){return x.pp||0;}));
+    var high = avg(hs.map(function(x){return x.chigh;}).filter(function(v){return v!=null;}));
+    var sc = 0;
+    if (hum != null) sc += hum >= 90 ? 30 : hum >= 80 ? 20 : hum >= 70 ? 10 : 0;
+    if (spread != null) sc += spread <= 1.5 ? 25 : spread <= 3 ? 12 : 0;
+    if (wind != null) sc += wind <= 8 ? 20 : wind <= 15 ? 10 : 0;
+    sc += rain <= 20 ? 15 : rain <= 40 ? 7 : 0;
+    if (high != null) sc += high <= 50 ? 10 : 0;
+    return { score:sc, hum:hum, spread:spread, wind:wind, rain:rain, high:high };
+  }
+  function cloudLabel(sc){ return sc >= 70 ? ["Khả năng cao","good"] : sc >= 45 ? ["Trung bình",""] : ["Thấp","warn"]; }
+
+  function routeUrl(day){
+    var stops = [];
+    PLAN.forEach(function(p){ if(p.d===day && p.p && stops.indexOf(p.p)<0) stops.push(p.p); });
+    if (stops.length < 2) return null;
+    var mid = stops.slice(1, -1).slice(0, 8);
+    return "https://www.google.com/maps/dir/?api=1&travelmode=two-wheeler&origin=" + encodeURIComponent(q(stops[0])) +
+      "&destination=" + encodeURIComponent(q(stops[stops.length-1])) +
+      (mid.length ? "&waypoints=" + encodeURIComponent(mid.map(q).join("|")) : "");
+  }
+
+  var SLOTS = {"Sáng":[5,10],"Trưa":[11,13],"Chiều":[14,17],"Tối":[18,21]};
+  function slotRain(day, buoi){
+    var w = wDay(day); if (!w) return null;
+    var r = SLOTS[buoi];
+    if (w.hours && r){
+      var v = [];
+      for (var h = r[0]; h <= r[1]; h++) if (w.hours[h] && w.hours[h].pp != null) v.push(w.hours[h].pp);
+      if (v.length) return Math.max.apply(null, v);
+    }
+    return w.rainProb;
+  }
+
+  // ---------- Chi phí: giá trị hiệu lực của một dòng
+  function lineVal(l){ return state.val[l.id] != null ? state.val[l.id] : l.v; }
+  function lineActive(l){
+    if (l.hotel) return l.hotel === state.keep || state.keep === "both";
+    if (l.opt) return !!state.on[l.id];
+    return true;
+  }
+  function dayMeals(d){ var s = 0, has = false; LINES.forEach(function(l){ if (l.day === d && l.g === "Ăn uống" && lineVal(l) != null){ s += lineVal(l); has = true; } }); return has ? s : null; }
+
+  // ---------- Màu
+  function hexToRgb(h){ h = h.replace("#",""); return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)]; }
+  function lum(h){
+    var c = hexToRgb(h).map(function(v){ v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  }
+  function contrast(a, b){ var x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+  function hexToHsl(h){
+    var c = hexToRgb(h).map(function(v){ return v / 255; }), mx = Math.max.apply(null, c), mn = Math.min.apply(null, c), l = (mx + mn) / 2, s = 0, hh = 0, d = mx - mn;
+    if (d){
+      s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+      if (mx === c[0]) hh = (c[1] - c[2]) / d + (c[1] < c[2] ? 6 : 0); else if (mx === c[1]) hh = (c[2] - c[0]) / d + 2; else hh = (c[0] - c[1]) / d + 4;
+      hh *= 60;
+    }
+    return [hh, s * 100, l * 100];
+  }
+  function hslToHex(h, s, l){
+    h = ((h % 360) + 360) % 360; s /= 100; l /= 100;
+    var a = s * Math.min(l, 1 - l);
+    function f(n){ var k = (n + h / 30) % 12; return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1))))); }
+    return "#" + [f(0), f(8), f(4)].map(function(v){ return ("0" + v.toString(16)).slice(-2); }).join("");
+  }
+  // Độ nổi của màu fg trên nền bg: tương phản sáng tối, hoặc khác sắc rõ khi độ sáng gần nhau (vd đỏ trên xanh)
+  function vis(fg, bg){
+    var c = contrast(fg, bg), f = hexToHsl(fg), b = hexToHsl(bg), hd = Math.abs(f[0] - b[0]); if (hd > 180) hd = 360 - hd;
+    if (c >= 3) return ["nổi", "good"];
+    if (f[1] >= 35 && b[1] >= 15 && hd >= 90) return ["nổi nhờ khác sắc", "good"];
+    if (c >= 1.8) return ["vừa", ""];
+    return ["dễ chìm", "warn"];
+  }
+  function sw(c, lab){
+    return '<span style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;font-size:.7rem;color:var(--muted);text-align:center"><i style="width:30px;height:30px;border-radius:8px;background:' + c + ';border:1px solid var(--line);display:block"></i>' + lab + '</span>';
+  }
+  function mannequin(title, p){
+    return '<div><div class="hint" style="margin-bottom:4px">' + title + '</div><div style="display:flex;gap:6px">' + sw(p.outer, "Khoác") + sw(p.top, "Áo") + sw(p.bottom, "Quần") + '</div></div>';
+  }
+  function coupleBy(id){ for (var i = 0; i < COUPLE.length; i++) if (COUPLE[i].id === id) return COUPLE[i]; return null; }
+  function conceptOf(o){
+    if (o.d === 15 || o.d === 19) return "comfy";
+    if (o.d === 16) return (o.b === "Sáng" && /4h/.test(o.slot)) ? "comfy" : "tonal";
+    if (o.d === 17) return o.b === "Sáng" ? "bright" : "dark";
+    if (o.d === 18) return /săn mây/i.test(o.slot) ? "bright" : "chill";
+    return null;
+  }
+  function coupleCards(){
+    var h = '<h2>Phối màu cặp đôi theo concept</h2>';
+    COUPLE.forEach(function(c){
+      h += '<div class="card"><b>' + esc(c.name) + '</b> <span class="hint">' + esc(c.when) + '</span>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:18px;margin:10px 0">' + mannequin("Bạn", c.you) + mannequin("Người đi cùng", c.partner) +
+        (c.shared ? '<div><div class="hint" style="margin-bottom:4px">Món chung</div>' + sw(c.shared.c, c.shared.n) + '</div>' : '') + '</div>' +
+        c.bg.map(function(n){
+          var b = bgBy(n), a = vis(c.you.main, b.c), p = vis(c.partner.main, b.c);
+          return '<div class="row"><span><i style="display:inline-block;width:12px;height:12px;border-radius:3px;background:' + b.c + ';border:1px solid var(--line);vertical-align:-1px"></i> Nền ' + esc(b.n) + '</span>' +
+            '<span>Bạn <span class="badge ' + a[1] + '">' + a[0] + '</span> Người đi cùng <span class="badge ' + p[1] + '">' + p[0] + '</span></span></div>';
+        }).join("") +
+        '<div class="hint" style="margin-top:6px">' + esc(c.tip) + '</div></div>';
+    });
+    return h;
+  }
+  var tool = { col:"#6b4a2f", bg:1 };
+  function suggestFor(hex){
+    var x = hexToHsl(hex), h = x[0], s = x[1], l = x[2];
+    var tonal = hslToHex(h, Math.max(12, s * 0.8), l > 55 ? l - 28 : l + 28);
+    if (s < 14) return [
+      ["Cùng tông, khác sắc độ", tonal, "An toàn, nhìn như một bộ."],
+      ["Một màu nhấn ấm (đỏ gạch)", "#b5523b", "Trung tính cộng một điểm nhấn, hợp chụp ảnh."],
+      ["Một màu nhấn mustard", "#d6a21e", "Tươi hơn, xem độ nổi theo nền ở trên."]
+    ];
+    return [
+      ["Cùng tông, khác sắc độ", tonal, "An toàn, nhìn như một bộ."],
+      ["Tương cận (lệch 30°)", hslToHex(h + 30, Math.min(60, Math.max(25, s)), Math.min(78, Math.max(30, l))), "Hài hoà, có chút khác biệt."],
+      ["Tương phản mềm (đối màu, giảm bão hoà)", hslToHex(h + 180, Math.min(45, Math.max(20, s * 0.7)), Math.min(65, Math.max(40, l))), "Nổi bật cạnh nhau, hợp chụp ảnh."]
+    ];
+  }
+  function renderTool(){
+    var el = $("coupleTool"); if (!el) return;
+    var bg = BGS[tool.bg], mine = vis(tool.col, bg.c);
+    var h = '<div class="hint" style="margin-bottom:6px">1. Chọn màu chủ đạo của bạn:</div><div style="display:flex;flex-wrap:wrap;gap:8px">' +
+      PALETTE.map(function(c){ return '<button type="button" data-col="' + c[1] + '" style="display:inline-flex;align-items:center;gap:6px;' + (tool.col === c[1] ? "border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)" : "") + '"><i style="width:16px;height:16px;border-radius:50%;background:' + c[1] + ';border:1px solid var(--line);display:inline-block"></i>' + c[0] + '</button>'; }).join("") +
+      '</div><div class="hint" style="margin:10px 0 6px">2. Chọn nền nơi chụp:</div><select id="toolBg">' +
+      BGS.map(function(b, i){ return '<option value="' + i + '"' + (i === tool.bg ? " selected" : "") + '>' + b.n + '</option>'; }).join("") + '</select>' +
+      ' <span class="badge ' + mine[1] + '">Bạn: ' + mine[0] + '</span>' +
+      '<div class="hint" style="margin:10px 0 6px">3. Gợi ý cho người đi cùng:</div>';
+    suggestFor(tool.col).forEach(function(s){
+      var v = vis(s[1], bg.c), cp = contrast(tool.col, s[1]), a = hexToHsl(tool.col), b = hexToHsl(s[1]), hd = Math.abs(a[0] - b[0]); if (hd > 180) hd = 360 - hd;
+      var twin = cp < 1.15 && hd < 20;
+      h += '<div class="card" style="margin:6px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
+        '<span style="display:inline-flex">' + sw(tool.col, "Bạn") + '</span><span style="display:inline-flex">' + sw(s[1], s[1]) + '</span>' +
+        '<span style="flex:1;min-width:150px"><b>' + esc(s[0]) + '</b><div class="hint">' + esc(s[2]) + '</div>' +
+        '<span class="badge ' + v[1] + '">Người đi cùng: ' + v[0] + '</span> ' + (twin ? '<span class="badge warn">dễ trùng màu với bạn</span>' : '') + '</span></div>';
+    });
+    el.innerHTML = h + '<p class="hint">Độ nổi tính theo tương phản sáng tối và khác sắc, chỉ là gợi ý màu, không đảm bảo hợp mắt.</p>';
+    Array.prototype.forEach.call(el.querySelectorAll("button[data-col]"), function(b){ b.addEventListener("click", function(){ tool.col = b.dataset.col; renderTool(); }); });
+    $("toolBg").addEventListener("change", function(e){ tool.bg = +e.target.value; renderTool(); });
+  }
+
+  // ---------- Ăn mặc
+  function outfitFor(p){
+    for (var i = 0; i < OUTFIT.length; i++){
+      var o = OUTFIT[i];
+      if (o.d === p.d && o.b === p.b && (!o.re || o.re.test(p.a + " " + p.p))) return o;
+    }
+    return null;
+  }
+  function outfitNote(d, b, c){
+    var t = [], rp = d >= 16 ? slotRain(d, b) : null, w = wDay(d);
+    if (rp != null && rp >= state.thr) t.push("Mưa " + Math.round(rp) + "%: ưu tiên lớp chống nước, áo khoác da cần áo mưa phủ ngoài.");
+    if (c === "Săn mây" && w && w.tmin != null && w.tmin < 16) t.push("Sáng sớm khoảng " + r0(w.tmin) + "°C, thêm một lớp len.");
+    return t.join(" ");
+  }
+  function outfitLine(p){
+    var o = outfitFor(p);
+    if (!o) return "";
+    var cc = coupleBy(conceptOf(o));
+    return cc ? '<br><span class="badge">' + esc(cc.name) + '</span>' : "";
+  }
+  function renderOutfit(){
+    var h = '<p class="hint">Style clean, chill, retro kiểu Đà Lạt. Cột "Bạn" bám theo đồ bạn đã liệt kê, cột "Người đi cùng" là gợi ý chung. Có dự báo thì trang tự thêm nhắc nhở mưa và lạnh.</p>';
+    h += '<div class="card"><b>Bảng màu</b><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">' +
+      PALETTE.map(function(c){ return '<span style="display:inline-flex;align-items:center;gap:6px;font-size:.82rem"><i style="width:18px;height:18px;border-radius:50%;background:' + c[1] + ';border:1px solid var(--line);display:inline-block"></i>' + c[0] + '</span>'; }).join("") +
+      '</div></div>';
+    h += '<div class="card"><b>Nguyên tắc</b><ul style="margin:6px 0 0;padding-left:18px">' + RULES.map(function(r){ return '<li style="margin:3px 0">' + esc(r) + '</li>'; }).join("") + '</ul></div>';
+    h += coupleCards();
+    h += '<h2>Gợi ý màu cho người đi cùng</h2><div class="card" id="coupleTool"></div>';
+    var last = null;
+    OUTFIT.forEach(function(o){
+      if (o.d !== last){
+        last = o.d;
+        var f = fmt("2026-11-" + o.d);
+        h += '<h2>' + f.dow + ' ' + f.day + '</h2>';
+      }
+      var n = outfitNote(o.d, o.b, /săn mây/i.test(o.slot) ? "Săn mây" : "");
+      var cc = coupleBy(conceptOf(o));
+      h += '<div class="card"><b>' + esc(o.slot) + '</b>' + (cc ? ' <span class="badge">' + esc(cc.name) + '</span>' : '') +
+        '<div class="row"><span>Bạn</span><span style="text-align:right;color:var(--text)">' + esc(o.me) + '</span></div>' +
+        '<div class="row"><span>Người đi cùng</span><span style="text-align:right;color:var(--text)">' + esc(o.you) + '</span></div>' +
+        (n ? '<div class="hint err" style="margin-top:6px">' + esc(n) + '</div>' : '') + '</div>';
+    });
+    var done = PACK.filter(function(_, i){ return state.pack[i]; }).length;
+    h += '<h2>Đồ mang (' + done + ' / ' + PACK.length + ')</h2><div class="card">';
+    PACK.forEach(function(t, i){
+      h += '<label class="item" style="margin:6px 0;cursor:pointer"><input type="checkbox" data-p="' + i + '" ' + (state.pack[i] ? "checked" : "") + '>' +
+        '<span style="' + (state.pack[i] ? "opacity:.5;text-decoration:line-through" : "") + '">' + esc(t) + '</span></label>';
+    });
+    $("s-outfit").innerHTML = h + '</div>';
+    renderTool();
+    Array.prototype.forEach.call($("s-outfit").querySelectorAll("input[data-p]"), function(cb){
+      cb.addEventListener("change", function(){ state.pack[cb.dataset.p] = cb.checked; save(); renderOutfit(); });
+    });
+  }
+
+  // ---------- Tab Lịch trình
+  function renderPlan(){
+    var h = '<p class="hint">Tick khi đã làm xong. Mục ngoài trời hiện nhãn mưa và Plan B nổi bật khi xác suất mưa trong khung giờ đó từ ' + state.thr + '% trở lên (chỉnh ở tab Thời tiết). Viền đứt là mục tuỳ chọn.</p>';
+    var urgent = BOOK.filter(function(b){ return b.st === "todo"; }).length;
+    if (urgent) h += '<div class="card alert"><b>' + urgent + ' việc đặt trước chưa hoàn thành</b> (nhận phòng sớm, xe máy, đặt chỗ ăn tối 17/11...). Xem tab Đặt trước.</div>';
+    var s17 = cloudScore(wDay(17)), s18 = cloudScore(wDay(18));
+    h += '<div class="card"><b>Thứ tự săn mây</b> ' +
+      '<button type="button" data-v="base" class="' + (state.variant === "base" ? "on" : "") + '">Gốc: Cầu Đất 17/11, Đa Phú 18/11</button> ' +
+      '<button type="button" data-v="swap" class="' + (state.variant === "swap" ? "on" : "") + '">Đổi: Đa Phú 17/11, Cầu Đất 18/11</button>' +
+      (s17 && s18 ? '<div class="hint" style="margin-top:6px">Điểm săn mây theo dự báo: sáng 17/11 ' + s17.score + '/100, sáng 18/11 ' + s18.score + '/100.</div>' : '') +
+      '<div class="hint" style="margin-top:4px">' + (state.variant === "swap"
+        ? 'Phương án đổi: sáng 17/11 nhẹ hơn sau đêm trên xe (Đa Phú gần), sáng 18/11 dậy 4h30 đi Cầu Đất rồi phải về kịp trả phòng Faru trước 12:00 và nhận phòng New Life. Viện nghiên cứu và ăn sáng chợ chuyển sang 17/11, bữa tối và cà phê giữ nguyên.'
+        : 'Phương án gốc: Cầu Đất sáng 17/11 (dậy 4h45 ngay sau đêm xe), Đa Phú sáng 18/11.') + '</div></div>';
+    var last = null;
+    PLAN.forEach(function(p, i){
+      if (p.d !== last){
+        last = p.d;
+        var f = fmt("2026-11-" + p.d), w = wDay(p.d), ru = routeUrl(p.d), meal = dayMeals(p.d);
+        h += '<div class="day"><div class="h"><span>' + f.dow + ' ' + f.day + '</span><span>' +
+          (ru ? '<a class="btn" target="_blank" rel="noopener" href="' + ru + '">Tuyến cả ngày</a>' : '') + '</span></div><div class="w">';
+        if (w){
+          h += '<span class="badge">' + icon(w.code) + ' ' + r0(w.tmin) + '–' + r0(w.tmax) + '°C</span>' +
+            (w.rainProb != null ? '<span class="badge ' + (w.rainProb >= state.thr ? "warn" : "") + '">Mưa ' + Math.round(w.rainProb) + '%</span>' : '') +
+            '<span class="badge">Mặt trời mọc ' + hhmm(w.sunrise) + '</span>';
+        }
+        if (meal != null) h += '<span class="hint">Ăn uống dự trù ' + vnd(meal) + '</span>';
+        h += '</div></div>';
+      }
+      var rp = p.w ? slotRain(p.d, p.b) : null, useB = p.pb && rp != null && rp >= state.thr;
+      var kk = pk(p);
+      h += '<div class="card item' + (state.done[kk] ? " done" : "") + (p.o ? " opt" : "") + '">' +
+        '<input type="checkbox" data-k="' + esc(kk) + '" ' + (state.done[kk] ? "checked" : "") + ' aria-label="Xong">' +
+        '<div><div class="t">' + esc(p.a) + (useB ? ' <span class="badge warn">Mưa ' + Math.round(rp) + '%</span>' : '') + (p.o ? ' <span class="badge">Tuỳ chọn</span>' : '') + '</div>' +
+        '<div class="time">' + p.b + (p.t ? ' · ' + p.t : '') + ' · ' + p.c + (p.m ? ' · ' + vnd(p.m) : '') + '</div></div>' +
+        '<div class="meta">' +
+          (p.p ? '<a href="' + mapUrl(p.p) + '" target="_blank" rel="noopener">' + esc(p.p) + '</a>' : '') +
+          (p.pb ? '<br><span class="pb">' + (useB ? 'Cân nhắc Plan B' : 'Plan B nếu mưa') + ': ' + esc(p.pb) + '</span>' : '') +
+          (p.n ? '<br>' + esc(p.n) : '') +
+          outfitLine(p) +
+        '</div></div>';
+    });
+    $("s-plan").innerHTML = h;
+    Array.prototype.forEach.call($("s-plan").querySelectorAll("input[type=checkbox]"), function(cb){
+      cb.addEventListener("change", function(){ state.done[cb.dataset.k] = cb.checked; save(); renderPlan(); });
+    });
+    Array.prototype.forEach.call($("s-plan").querySelectorAll("button[data-v]"), function(b){
+      b.addEventListener("click", function(){ state.variant = b.dataset.v; buildPlan(); save(); renderPlan(); });
+    });
+  }
+
+  // ---------- Tab Thời tiết
+  function tipFor(d){
+    var t = [];
+    if (d.rainProb != null && d.rainProb >= state.thr) t.push("Khả năng mưa cao, xem Plan B cho mục ngoài trời.");
+    else if (d.rainProb != null && d.rainProb >= 35) t.push("Có thể mưa, mang áo mưa gọn.");
+    if (d.tmin != null && d.tmin < 15) t.push("Sáng sớm lạnh (" + r0(d.tmin) + "°C), mang áo ấm.");
+    return t.length ? t.join(" ") : "Thời tiết thuận lợi.";
+  }
+  function renderWeather(){
+    var h = '<div class="card"><span class="badge ' + (weather.forecast ? "good" : "warn") + '">' + weather.label + '</span> ' +
+      '<button id="refresh" type="button">Làm mới</button>' +
+      (weather.note ? '<p class="hint">' + weather.note + '</p>' : '') +
+      '<label class="hint">Ngưỡng xác suất mưa để gợi ý Plan B: <b id="thrv">' + state.thr + '</b>%</label>' +
+      '<input id="thr" type="range" min="20" max="90" step="5" value="' + state.thr + '"></div>';
+    if (weather.days){
+      h += '<div class="grid">';
+      weather.days.forEach(function(d){
+        var f = fmt(d.date);
+        h += '<div class="card"><b>' + f.day + '</b> <span class="hint">' + f.dow + '</span><div style="font-size:2rem;line-height:1.2">' + icon(d.code) + '</div>' +
+          '<div><b style="font-size:1.15rem">' + r0(d.tmax) + '°</b> <span class="hint">/ ' + r0(d.tmin) + '°C</span></div>' +
+          '<div class="row"><span>' + (weather.forecast ? "Xác suất mưa" : "Ngày có mưa") + '</span><span>' + (d.rainProb == null ? "–" : Math.round(d.rainProb) + "%") + '</span></div>' +
+          '<div class="row"><span>Lượng mưa</span><span>' + (d.rain == null ? "–" : d.rain.toFixed(1) + " mm") + '</span></div>' +
+          '<div class="row"><span>Mặt trời</span><span>' + hhmm(d.sunrise) + " / " + hhmm(d.sunset) + '</span></div>' +
+          '<div class="hint" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line)">' + tipFor(d) + '</div></div>';
+      });
+      h += '</div><h2>Săn mây: sáng 17/11 (Cầu Đất) và sáng 18/11 (Đồi Đa Phú)</h2>';
+      if (weather.forecast){
+        var s17 = cloudScore(wDay(17)), s18 = cloudScore(wDay(18));
+        [[17,s17,"Cầu Đất"],[18,s18,"Đồi Đa Phú"]].forEach(function(x){
+          if (!x[1]) return;
+          var lb = cloudLabel(x[1].score);
+          h += '<div class="card"><b>Sáng ' + x[0] + '/11 · ' + x[2] + '</b> <span class="badge ' + lb[1] + '">' + lb[0] + ' (' + x[1].score + '/100)</span>' +
+            '<div class="row"><span>Độ ẩm 5-7h</span><span>' + r0(x[1].hum) + '%</span></div>' +
+            '<div class="row"><span>Chênh nhiệt độ và điểm sương</span><span>' + (x[1].spread == null ? "–" : x[1].spread.toFixed(1)) + '°C</span></div>' +
+            '<div class="row"><span>Gió</span><span>' + r0(x[1].wind) + ' km/h</span></div>' +
+            '<div class="row"><span>Xác suất mưa cao nhất</span><span>' + Math.round(x[1].rain) + '%</span></div>' +
+            '<div class="row"><span>Mây tầng cao</span><span>' + r0(x[1].high) + '%</span></div></div>';
+        });
+        if (s17 && s18){
+          var better = s17.score === s18.score ? "Hai sáng ngang nhau, giữ nguyên kế hoạch." :
+            (s18.score > s17.score ? "Sáng 18/11 có điểm cao hơn. Cân nhắc đổi Cầu Đất sang 18/11 và Đồi Đa Phú sang 17/11." : "Sáng 17/11 có điểm cao hơn, giữ Cầu Đất vào 17/11.");
+          h += '<p class="hint"><b>' + better + '</b> Điểm là công thức đơn giản (độ ẩm cao, gió nhẹ, ít mưa, mây cao thưa thì dễ có biển mây), chưa được kiểm chứng.</p>';
+        }
+      } else {
+        h += '<p class="hint">Cần dự báo thật để tính điểm săn mây. Dự báo có khi ngày đi nằm trong khoảng 16 ngày tới.</p>';
+      }
+    } else if (weather.err){
+      h += '<p class="err">' + weather.err + '</p>';
+    }
+    $("s-weather").innerHTML = h;
+    $("refresh").addEventListener("click", loadWeather);
+    var thr = $("thr");
+    thr.addEventListener("input", function(e){ state.thr = +e.target.value; $("thrv").textContent = state.thr; save(); renderPlan(); renderOutfit(); });
+    thr.addEventListener("change", renderWeather);
+  }
+
+  function loadForecast(){
+    var u = "https://api.open-meteo.com/v1/forecast?latitude=" + LAT + "&longitude=" + LON +
+      "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,sunrise,sunset" +
+      "&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover_high,wind_speed_10m,precipitation_probability" +
+      "&timezone=" + encodeURIComponent(TZ) + "&start_date=" + DAYS[0] + "&end_date=" + DAYS[3];
+    return fetchJson(u).then(function(j){
+      if (!j.daily || !j.daily.time || !j.daily.time.length) throw new Error("none");
+      var H = j.hourly || {time:[]};
+      return j.daily.time.map(function(date,i){
+        var hours = {};
+        H.time.forEach(function(ts,k){
+          if (ts.slice(0,10) === date) hours[parseInt(ts.slice(11,13),10)] = {
+            temp:H.temperature_2m[k], rh:H.relative_humidity_2m[k], dew:H.dew_point_2m[k],
+            chigh:H.cloud_cover_high[k], wind:H.wind_speed_10m[k], pp:H.precipitation_probability[k] };
+        });
+        return { date:date, tmax:j.daily.temperature_2m_max[i], tmin:j.daily.temperature_2m_min[i], rain:j.daily.precipitation_sum[i],
+          rainProb:j.daily.precipitation_probability_max[i], code:j.daily.weathercode[i], sunrise:j.daily.sunrise[i], sunset:j.daily.sunset[i], hours:hours };
+      });
+    });
+  }
+  function loadClimate(){
+    var reqs = CLIMATE_YEARS.map(function(y){
+      var u = "https://archive-api.open-meteo.com/v1/archive?latitude=" + LAT + "&longitude=" + LON +
+        "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,sunrise,sunset&timezone=" + encodeURIComponent(TZ) +
+        "&start_date=" + y + "-11-16&end_date=" + y + "-11-19";
+      return fetchJson(u).catch(function(){ return null; });
+    });
+    return Promise.all(reqs).then(function(list){
+      var ok = list.filter(Boolean); if (!ok.length) throw new Error("none");
+      return { years: ok.length, days: DAYS.map(function(date,i){
+        var tx=[],tn=[],rn=[],wet=0,sr=null,ss=null;
+        ok.forEach(function(j){ var d=j.daily; if(!d||d.time[i]==null) return;
+          if(d.temperature_2m_max[i]!=null) tx.push(d.temperature_2m_max[i]);
+          if(d.temperature_2m_min[i]!=null) tn.push(d.temperature_2m_min[i]);
+          if(d.precipitation_sum[i]!=null){ rn.push(d.precipitation_sum[i]); if(d.precipitation_sum[i]>=1) wet++; }
+          sr=d.sunrise[i]; ss=d.sunset[i]; });
+        return { date:date, tmax:avg(tx), tmin:avg(tn), rain:avg(rn), rainProb: rn.length ? wet/rn.length*100 : null, code:null, sunrise:sr, sunset:ss, hours:null };
+      })};
+    });
+  }
+  function loadWeather(){
+    weather.label = "Đang tải…"; weather.err = ""; renderWeather();
+    loadForecast().then(function(days){
+      weather = { days:days, label:"Dự báo", forecast:true, note:"Cập nhật " + new Date().toLocaleString("vi-VN") + ". Dự báo xa dễ thay đổi, xem lại gần ngày đi.", err:"" };
+    }).catch(function(){
+      return loadClimate().then(function(r){
+        weather = { days:r.days, label:"Trung bình nhiều năm", forecast:false, err:"",
+          note:"Chưa có dự báo thật cho các ngày này. Đang hiển thị trung bình " + r.years + " năm gần nhất của đúng 16-19/11." };
+      });
+    }).catch(function(){
+      weather = { days:null, label:"Lỗi", forecast:false, note:"", err:"Không tải được dữ liệu thời tiết. Kiểm tra kết nối mạng rồi bấm Làm mới." };
+    }).then(function(){ renderWeather(); renderPlan(); renderOutfit(); });
+  }
+
+  // ---------- Tab Đặt trước
+  function linkify(s){ return esc(s).replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>'); }
+  function renderBook(){
+    var groups = [["todo","Cần làm","warn"],["done","Đã đặt","good"],["cancel","Đã hủy","mute"]];
+    var h = "";
+    var tala = BOOK.filter(function(b){return /Tala/.test(b.n) && b.st==="done";}).length, faru = BOOK.filter(function(b){return /Faru/.test(b.n) && b.st==="done";}).length;
+    if (tala && faru) h += '<div class="card alert"><b>Đang đặt cả Tala và Faru cho 16-18/11.</b> Bảng của bạn không ghi hạn hủy miễn phí. Kiểm tra và hủy một khách sạn trước hạn, nếu không có thể phải trả cả hai (Tala 782k, Faru chưa có giá).</div>';
+    groups.forEach(function(g){
+      var items = BOOK.filter(function(b){ return b.st === g[0]; });
+      if (!items.length) return;
+      h += '<h2>' + g[1] + ' (' + items.length + ')</h2>';
+      items.forEach(function(b){
+        h += '<div class="card"><b>' + esc(b.n) + '</b> <span class="badge ' + g[2] + '">' + g[1] + '</span>' +
+          (b.date ? ' <span class="hint">đặt ' + b.date + '</span>' : '') +
+          '<div class="hint">' + linkify(b.info) + (b.link ? ' ' + linkify(b.link) : '') + '</div>' +
+          (b.real !== undefined && g[0] === "done" ? '<div class="row"><span>Chi phí thực</span><span>' + (b.real == null ? "chưa có giá" : vnd(b.real)) + '</span></div>' : '') +
+          (b.est ? '<div class="row"><span>Chi phí ước tính</span><span>' + vnd(b.est) + '</span></div>' : '') + '</div>';
+      });
+    });
+    $("s-book").innerHTML = h;
+  }
+
+  // ---------- Tab Chi phí
+  function renderCost(){
+    var total = 0, missing = [], byG = {};
+    var h = '';
+    var groups = ["Đã đặt","Ước tính","Ăn uống"];
+    groups.forEach(function(g){
+      var sub = 0;
+      h += '<div class="card"><table><tr><th>' + g + '</th><th class="num">Số tiền (đ)</th></tr>';
+      LINES.filter(function(l){ return l.g === g; }).forEach(function(l){
+        var active = lineActive(l), v = lineVal(l);
+        if (active && v != null) sub += v;
+        if (active && v == null && !l.opt) missing.push(l.n);
+        h += '<tr' + (active ? '' : ' style="opacity:.45"') + '><td>' + (l.opt ? '<label><input type="checkbox" data-on="' + l.id + '" ' + (state.on[l.id] ? "checked" : "") + '> ' : '') + esc(l.n) + (l.opt ? '</label>' : '') +
+          (l.s ? '<div class="hint">' + esc(l.s) + '</div>' : '') + (l.hotel && !active ? '<div class="hint">Không tính vì không được chọn</div>' : '') + '</td>' +
+          '<td class="num"><input type="number" min="0" step="1000" data-v="' + l.id + '" value="' + (v == null ? "" : v) + '" placeholder="chưa nhập"></td></tr>';
+      });
+      h += '<tr><td><b>Cộng ' + g.toLowerCase() + '</b></td><td class="num"><b>' + vnd(sub) + '</b></td></tr></table></div>';
+      total += sub; byG[g] = sub;
+    });
+    var budget = 8000000, pct = Math.min(100, total / budget * 100);
+    h += '<div class="card"><div class="big">' + vnd(total) + '</div>' +
+      (missing.length ? '<div class="err hint">Chưa gồm: ' + esc(missing.join("; ")) + '.</div>' : '') +
+      '<div class="bar ' + (total > budget ? "over" : "") + '"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="row"><span>Ngân sách tối đa</span><span>' + vnd(budget) + '</span></div>' +
+      '<div class="row"><span>' + (total > budget ? "Vượt" : "Còn lại") + '</span><span>' + vnd(Math.abs(budget - total)) + '</span></div>' +
+      '<div class="row"><span>Mỗi người</span><span>' + vnd(total / 2) + '</span></div></div>';
+    $("s-cost").innerHTML = h;
+    Array.prototype.forEach.call($("s-cost").querySelectorAll("input[data-v]"), function(inp){
+      inp.addEventListener("change", function(){
+        if (inp.value === "") delete state.val[inp.dataset.v]; else state.val[inp.dataset.v] = Math.max(0, +inp.value || 0);
+        save(); renderCost(); renderPlan();
+      });
+    });
+    Array.prototype.forEach.call($("s-cost").querySelectorAll("input[data-on]"), function(cb){
+      cb.addEventListener("change", function(){ state.on[cb.dataset.on] = cb.checked; save(); renderCost(); });
+    });
+  }
+
+  function renderAlt(){
+    var h = '<p class="hint">Gợi ý thay thế của mình, không có trong bảng kế hoạch của bạn.</p><div class="card"><table><tr><th>Nhóm</th><th>Phương án</th></tr>';
+    ALT.forEach(function(a){ h += '<tr><td>' + a[0] + '</td><td><b>' + esc(a[1]) + '</b><div class="hint">' + esc(a[2]) + '</div></td></tr>'; });
+    $("s-alt").innerHTML = h + '</table></div>';
+  }
+
+  function renderTodo(){
+    var n = TODO.filter(function(_, i){ return state.todo[i]; }).length;
+    var h = '<p class="hint">' + n + ' / ' + TODO.length + ' mục đã xong</p><div class="card">';
+    TODO.forEach(function(t, i){
+      h += '<label class="item" style="margin:6px 0;cursor:pointer"><input type="checkbox" data-i="' + i + '" ' + (state.todo[i] ? "checked" : "") + '>' +
+        '<span style="' + (state.todo[i] ? "opacity:.5;text-decoration:line-through" : "") + '">' + esc(t[0]) + ' <span class="badge ' + (t[1]==="Quan trọng" ? "warn" : "") + '">' + t[1] + '</span></span></label>';
+    });
+    $("s-todo").innerHTML = h + '</div>';
+    Array.prototype.forEach.call($("s-todo").querySelectorAll("input"), function(cb){
+      cb.addEventListener("change", function(){ state.todo[cb.dataset.i] = cb.checked; save(); renderTodo(); });
+    });
+  }
+
+  renderPlan(); renderOutfit(); renderBook(); renderCost(); renderAlt(); renderTodo(); renderWeather();
+  var hs = location.hash.slice(1);
+  show(/^(plan|weather|outfit|book|cost|alt|todo)$/.test(hs) ? hs : "plan");
+  loadWeather();
+})();
+</script>
+</body>
+</html>
