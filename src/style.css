@@ -61,6 +61,66 @@ h2 {
   font-size: 0.92rem;
 }
 
+.top-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.sync-card {
+  margin-bottom: 12px;
+  border-color: var(--accent);
+}
+
+.sync-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-bottom: 8px;
+}
+
+.sync-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sync-import {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#sync-input {
+  width: 100%;
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+#sync-msg {
+  margin-top: 6px;
+}
+
 .hero-3d-wrap {
   position: relative;
   border-radius: 14px;

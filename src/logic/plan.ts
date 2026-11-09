@@ -17,7 +17,7 @@ export function pk(p: PlanItem): string {
 }
 
 export function queryWithCity(loc: string): string {
-  return /Đà Lạt|Dalat|Da Lat|Thủ Dầu Một/i.test(loc) ? loc : `${loc} Đà Lạt`;
+  return /Đà Lạt|Dalat|Da Lat|Thủ Dầu Một|Củ Chi|Cu Chi/i.test(loc) ? loc : `${loc} Đà Lạt`;
 }
 
 export function mapUrl(loc: string): string {

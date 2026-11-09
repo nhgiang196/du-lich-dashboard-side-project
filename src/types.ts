@@ -93,10 +93,19 @@ export interface DailyWeather {
   hours: Record<number, HourlyWeather> | null;
 }
 
+export interface WeatherCache {
+  days: DailyWeather[];
+  forecast: boolean;
+  years?: number;
+  savedAt: string;
+}
+
 export interface WeatherState {
   days: DailyWeather[] | null;
   label: string;
   forecast: boolean;
+  cached?: boolean;
+  savedAt?: string;
   note: string;
   err: string;
 }

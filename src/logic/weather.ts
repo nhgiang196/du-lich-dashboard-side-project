@@ -1,5 +1,38 @@
 import { CLIMATE_YEARS, DAYS, LAT, LON, SLOTS, TZ } from "../data/tripData";
-import type { CloudScoreResult, DailyWeather, HourlyWeather, TimeSlot } from "../types";
+import type {
+  CloudScoreResult,
+  DailyWeather,
+  HourlyWeather,
+  TimeSlot,
+  WeatherCache,
+  WeatherState,
+} from "../types";
+
+export function formatSavedTime(iso: string): string {
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString("vi-VN");
+  } catch {
+    return iso;
+  }
+}
+
+export function applyWeatherCache(weather: WeatherState, cache: WeatherCache): void {
+  weather.days = cache.days;
+  weather.forecast = cache.forecast;
+  weather.cached = true;
+  weather.savedAt = cache.savedAt;
+  weather.err = "";
+  const timeStr = formatSavedTime(cache.savedAt);
+  if (cache.forecast) {
+    weather.label = "Dự báo (đã lưu)";
+    weather.note = `Đang xem bản lưu dự báo lúc ${timeStr} (dùng khi mất sóng / ngoại tuyến).`;
+  } else {
+    weather.label = "Trung bình nhiều năm (đã lưu)";
+    weather.note = `Đang xem dữ liệu trung bình ${cache.years ?? 8} năm đã lưu lúc ${timeStr} (ngoại tuyến).`;
+  }
+}
 
 export function avg(arr: number[]): number | null {
   return arr.length ? arr.reduce((x, y) => x + y, 0) / arr.length : null;

@@ -210,9 +210,10 @@ export function renderPlan(ctx: RenderContext): void {
 
   let h = `<p class="hint">Tick khi đã làm xong. Mục ngoài trời hiện nhãn mưa và Plan B nổi bật khi xác suất mưa trong khung giờ đó từ ${state.thr}% trở lên (chỉnh ở tab Thời tiết). Viền đứt là mục tuỳ chọn.</p>`;
 
-  const urgent = BOOK.filter((b) => b.st === "todo").length;
-  if (urgent) {
-    h += `<div class="card alert"><b>${urgent} việc đặt trước chưa hoàn thành</b> (nhận phòng sớm, xe máy, đặt chỗ ăn tối 17/11...). Xem tab Đặt trước.</div>`;
+  const urgentItems = BOOK.filter((b) => b.st === "todo");
+  if (urgentItems.length) {
+    const names = urgentItems.map((b) => b.n.toLowerCase()).join(", ");
+    h += `<div class="card alert"><b>${urgentItems.length} việc đặt trước chưa hoàn thành</b> (${esc(names)}). Xem tab Đặt trước.</div>`;
   }
 
   const s17 = cloudScore(findWeatherDay(weather.days, 17));
@@ -398,6 +399,7 @@ export function renderWeather(ctx: RenderContext): void {
 
   let h =
     `<div class="card"><span class="badge ${weather.forecast ? "good" : "warn"}">${weather.label}</span> ` +
+    (weather.cached ? '<span class="badge">Đã lưu offline</span> ' : "") +
     '<button id="refresh" type="button">Làm mới</button>' +
     (weather.note ? `<p class="hint">${weather.note}</p>` : "") +
     `<label class="hint" for="thr">Ngưỡng xác suất mưa để gợi ý Plan B: <b id="thrv">${state.thr}</b>%</label>` +
