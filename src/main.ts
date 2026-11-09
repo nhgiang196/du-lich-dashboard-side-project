@@ -41,6 +41,8 @@ const weather: WeatherState = {
 };
 
 let sceneCtrl: DalatSceneController | null = null;
+let lastWeatherFetchMs = 0;
+const WEATHER_COOLDOWN_MS = 30_000;
 
 function applyInitialWeatherCache(): void {
   const cached = loadWeatherCache();
@@ -305,6 +307,24 @@ function syncSceneClouds(): void {
 }
 
 async function refreshWeather(): Promise<void> {
+  const now = Date.now();
+  if (weather.days && !weather.cached && now - lastWeatherFetchMs < WEATHER_COOLDOWN_MS) {
+    renderWeather(ctx);
+    return;
+  }
+
+  if (!navigator.onLine) {
+    const cached = loadWeatherCache();
+    if (cached) {
+      applyWeatherCache(weather, cached);
+      renderWeather(ctx);
+      renderPlan(ctx);
+      renderOutfit(ctx);
+      syncSceneClouds();
+      return;
+    }
+  }
+
   if (!weather.days) {
     weather.label = "Đang tải…";
     weather.err = "";
@@ -314,6 +334,7 @@ async function refreshWeather(): Promise<void> {
   try {
     const days = await loadForecast();
     const nowIso = new Date().toISOString();
+    lastWeatherFetchMs = Date.now();
     weather.days = days;
     weather.label = "Dự báo";
     weather.forecast = true;
@@ -330,6 +351,7 @@ async function refreshWeather(): Promise<void> {
       try {
         const r = await loadClimate();
         const nowIso = new Date().toISOString();
+        lastWeatherFetchMs = Date.now();
         weather.days = r.days;
         weather.label = "Trung bình nhiều năm";
         weather.forecast = false;

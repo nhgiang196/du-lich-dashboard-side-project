@@ -3,15 +3,56 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="theme-color" content="#2f7d5b" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Đà Lạt 16-19/11" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <title>Đà Lạt 16-19/11/2026 · Dashboard</title>
   </head>
   <body>
     <main>
-      <h1>Đà Lạt 16-19/11/2026</h1>
-      <p class="sub">
-        <span id="count"></span> · 2 người · xe Đà Lạt Ơi 22:30 tối 15/11 · thuê xe máy · 16-18/11
-        Faru Pine Woods Villa · 18-19/11 New Life Hotel
-      </p>
+      <div class="top-head">
+        <div>
+          <h1>Đà Lạt 16-19/11/2026</h1>
+          <p class="sub">
+            <span id="count"></span> · 2 người · xe Đà Lạt Ơi (đón tối 15/11, khởi hành 00:00) ·
+            thuê xe máy · 16-18/11 Faru Pine Woods Villa · 18-19/11 New Life Hotel
+          </p>
+        </div>
+        <div class="top-actions">
+          <span id="net-status" class="badge warn" hidden>📡 Offline · Dùng dữ liệu đã lưu</span>
+          <button id="toggle-sync" type="button" aria-expanded="false">🔄 Đồng bộ 2 người</button>
+        </div>
+      </div>
+
+      <section id="sync-panel" class="card sync-card" hidden aria-label="Đồng bộ trạng thái 2 người">
+        <div class="sync-head">
+          <b>Đồng bộ trạng thái giữa 2 máy</b>
+          <span class="hint">Gửi qua Zalo / tin nhắn (dùng được cả khi mạng yếu)</span>
+        </div>
+        <div class="sync-row">
+          <button id="btn-copy-link" type="button">🔗 Sao chép link đồng bộ</button>
+          <button id="btn-copy-code" type="button">📋 Sao chép mã ngắn</button>
+          <button id="btn-share-native" type="button" hidden>📤 Chia sẻ nhanh</button>
+        </div>
+        <div class="sync-import">
+          <input
+            id="sync-input"
+            type="text"
+            placeholder="Dán link hoặc mã đồng bộ (dl1...) của người đi cùng vào đây"
+            aria-label="Mã hoặc link đồng bộ"
+          />
+          <div class="sync-row">
+            <button id="btn-sync-merge" type="button">Gộp cả 2 máy</button>
+            <button id="btn-sync-replace" type="button">Ghi đè theo mã này</button>
+          </div>
+        </div>
+        <div id="sync-msg" class="hint" aria-live="polite"></div>
+      </section>
 
       <div class="hero-3d-wrap" aria-label="Mô hình 3D đồi thông và biển mây Đà Lạt">
         <div id="scene-canvas"></div>
@@ -31,10 +72,10 @@
       <section id="s-todo" hidden></section>
 
       <footer>
-        Thời tiết: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>.
-        Giá và đặt phòng lấy từ bảng đặt trước của bạn. Điểm săn mây là công thức đơn giản dựa trên
-        độ ẩm, gió, mây, không phải dự báo chính thức. Tick, giá nhập tay được lưu trong trình duyệt
-        này.
+        Thời tiết: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>
+        (tự động lưu bản dự báo cuối để xem khi mất sóng). Giá và đặt phòng lấy từ bảng đặt trước
+        của bạn. Điểm săn mây là công thức đơn giản dựa trên độ ẩm, gió, mây, không phải dự báo
+        chính thức. Tick, giá nhập tay được lưu trên máy và có thể đồng bộ qua link/mã.
       </footer>
     </main>
 
