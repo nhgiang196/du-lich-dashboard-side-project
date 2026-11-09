@@ -48,8 +48,12 @@ Vercel có MCP server chính thức (`https://mcp.vercel.com`, OAuth), hữu íc
 3. Mở PR thử: Actions xanh và Vercel tạo Preview URL; merge thì Production cập nhật.
 4. Kiểm tra giao diện 375px và dung lượng chunk `three`.
 
+## Bảo vệ cơ bản trên Vercel (2 người dùng)
+- Không dùng Serverless Functions hay `@vercel/analytics` để tránh phát sinh request/invocation không cần thiết khi bị bot quét; toàn bộ app là **100% Static Assets** được phục vụ trực tiếp từ Vercel Edge CDN.
+- Chặn bot/crawler tự động qua `public/robots.txt` (`Disallow: /`), thẻ `<meta name="robots" content="noindex, nofollow, noarchive">` và header `X-Robots-Tag`, `Content-Security-Policy`, `X-Frame-Options: DENY` trong `vercel.json`.
+- Giới hạn tần suất gọi API thời tiết phía client (`WEATHER_COOLDOWN_MS = 30s`) và tự động dùng cache offline khi mất mạng.
+- **Tùy chọn trên giao diện Vercel**: Vào **Project Settings → Security (Firewall)** bật **Vercel Bot Fight Mode / Attack Challenge Mode** nếu muốn chặn triệt để traffic tự động.
+
 ## Cần người dùng
-- Xác nhận Vercel (không phải VPS).
-- Quyết định có đưa trang Đà Lạt vào repo này không (bản tham chiếu đang ở `docs/reference/dalat-trip/index.html`).
 - Cài Vercel GitHub App + `vercel login` + bật branch protection.
 - Không bao giờ dán token/mật khẩu vào chat.
