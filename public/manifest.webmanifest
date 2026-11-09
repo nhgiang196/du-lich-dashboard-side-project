@@ -1,0 +1,20 @@
+{
+  "name": "Đà Lạt 16-19/11/2026 · Dashboard",
+  "short_name": "Đà Lạt 16-19/11",
+  "description": "Lịch trình, dự báo thời tiết, điểm săn mây, phối đồ và chi phí chuyến đi Đà Lạt 16-19/11/2026 (dùng được khi mất sóng).",
+  "lang": "vi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#121a16",
+  "theme_color": "#2f7d5b",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

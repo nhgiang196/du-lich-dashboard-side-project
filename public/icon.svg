@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Đà Lạt Dashboard">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1b2e25" />
+      <stop offset="60%" stop-color="#2f7d5b" />
+      <stop offset="100%" stop-color="#e6f1ec" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#sky)" />
+  <circle cx="376" cy="136" r="44" fill="#fdebd9" opacity="0.92" />
+  <path d="M64 360 Q160 290 264 348 T448 336 L448 448 L64 448 Z" fill="#1f4d38" opacity="0.7" />
+  <polygon points="168,164 108,292 228,292" fill="#173829" />
+  <polygon points="168,214 96,348 240,348" fill="#122b20" />
+  <rect x="156" y="348" width="24" height="36" rx="4" fill="#5a3d27" />
+  <polygon points="292,190 240,302 344,302" fill="#1b4331" />
+  <polygon points="292,236 228,356 356,356" fill="#153526" />
+  <rect x="282" y="356" width="20" height="30" rx="4" fill="#5a3d27" />
+  <path d="M76 382 C76 356, 112 342, 144 352 C164 328, 212 328, 232 352 C258 336, 302 340, 320 362 C348 346, 392 352, 412 374 C432 376, 444 392, 436 410 L80 410 C68 402, 68 390, 76 382 Z" fill="#f4f7f5" opacity="0.95" />
+</svg>
