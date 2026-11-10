@@ -460,14 +460,14 @@ export const BOOK: BookingItem[] = [
   },
   {
     n: "Xe máy thuê",
-    st: "todo",
+    st: "done",
     info: "Nhận lúc 6h sáng 16/11 (hoặc trưa nếu tính theo giờ). Tiệm trên TikTok:",
     link: "https://www.tiktok.com/@thuexemay.dalat/photo/7680781244845559048",
     est: 480000,
   },
   {
     n: "Thuê máy ảnh 1 ngày (tuỳ chọn)",
-    st: "todo",
+    st: "cancel",
     info: "Hạ Camera - Cho thuê máy ảnh Đà Lạt.",
     est: 350000,
   },
