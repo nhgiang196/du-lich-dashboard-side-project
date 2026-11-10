@@ -593,7 +593,8 @@ export function renderCost(ctx: RenderContext): void {
     (missing.length ? `<div class="err hint">Chưa gồm: ${esc(missing.join("; "))}.</div>` : "") +
     `<div class="bar ${total > budget ? "over" : ""}"><i style="width:${pct}%"></i></div>` +
     `<div class="row"><span>Ngân sách tối đa</span><span>${vnd(budget)}</span></div>` +
-    `<div class="row"><span>${total > budget ? "Vượt" : "Còn lại"}</span><span>${vnd(Math.abs(budget - total))}</span></div>` 
+    `<div class="row"><span>${total > budget ? "Vượt" : "Còn lại"}</span><span>${vnd(Math.abs(budget - total))}</span></div>` +
+    `<div class="row"><span>Mỗi người</span><span>${vnd(perPerson)}</span></div></div>`;
   container.innerHTML = h;
 
   container.querySelectorAll<HTMLInputElement>("input[data-v]").forEach((inp) => {
