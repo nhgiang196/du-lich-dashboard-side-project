@@ -26,9 +26,22 @@
         </div>
         <div class="top-actions">
           <span id="net-status" class="badge warn" hidden>📡 Offline · Dùng dữ liệu đã lưu</span>
+          <button id="toggle-install" type="button" hidden>📲 Cài app</button>
           <button id="toggle-sync" type="button" aria-expanded="false">🔄 Đồng bộ 2 người</button>
         </div>
       </div>
+
+      <section id="install-hint" class="card" hidden aria-label="Hướng dẫn cài app trên iPhone">
+        <b>📲 Dùng offline &amp; thêm icon ra màn hình (Safari iPhone/iPad)</b>
+        <ol style="margin:6px 0 0;padding-left:20px">
+          <li>Mở trang này bằng <b>Safari</b> khi còn mạng, chờ tải xong.</li>
+          <li>Bấm nút <b>Chia sẻ</b> (ô vuông có mũi tên ⬆︎ ở thanh dưới hoặc trên cùng).</li>
+          <li>Kéo xuống chọn <b>Thêm vào Màn hình chính</b> rồi bấm <b>Thêm</b>.</li>
+          <li>Từ giờ mở app bằng icon ngoài màn hình; lịch trình và dự báo đã lưu vẫn xem được khi mất sóng.</li>
+        </ol>
+        <p class="hint">Nên mở app một lần có mạng trước chuyến đi để lưu dữ liệu thời tiết.</p>
+        <button type="button" data-install-close>Đã hiểu</button>
+      </section>
 
       <section id="sync-panel" class="card sync-card" hidden aria-label="Đồng bộ trạng thái 2 người">
         <div class="sync-head">

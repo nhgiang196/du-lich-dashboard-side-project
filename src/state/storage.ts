@@ -2,7 +2,8 @@ import { PACK, TODO } from "../data/tripData";
 import type { PlanVariant, TripState, WeatherCache } from "../types";
 
 export const STORAGE_KEY = "dalat-trip-v7";
-export const WEATHER_CACHE_KEY = "dalat-trip-weather-v1";
+export const WEATHER_CACHE_KEY = "dalat-trip-weather-v2";
+export const INSTALL_HINT_KEY = "dalat-trip-install-hint-v1";
 export const SYNC_PREFIX = "dl1.";
 
 export function createDefaultState(): TripState {
@@ -48,6 +49,22 @@ export function saveState(state: TripState): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
     // Ignore storage quota / privacy mode errors
+  }
+}
+
+export function loadInstallHintSeen(): boolean {
+  try {
+    return localStorage.getItem(INSTALL_HINT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function saveInstallHintSeen(): void {
+  try {
+    localStorage.setItem(INSTALL_HINT_KEY, "1");
+  } catch {
+    // Ignore storage errors
   }
 }
 

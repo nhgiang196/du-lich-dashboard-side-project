@@ -14,7 +14,15 @@ import {
 import { contrast, hexToHsl, suggestFor, vis } from "../logic/color";
 import { calculateCostSummary, dayMeals, lineActive, lineVal } from "../logic/cost";
 import { buildPlan, mapUrl, pk, routeUrl } from "../logic/plan";
-import { cloudLabel, cloudScore, findWeatherDay, slotRain, weatherIcon } from "../logic/weather";
+import {
+  cloudLabel,
+  cloudScore,
+  findWeatherDay,
+  rainLevel,
+  slotRain,
+  slotRainInfo,
+  weatherIcon,
+} from "../logic/weather";
 import { saveState } from "../state/storage";
 import type {
   BgPreset,
@@ -249,9 +257,6 @@ export function renderPlan(ctx: RenderContext): void {
       if (w) {
         h +=
           `<span class="badge">${weatherIcon(w.code)} ${r0(w.tmin)}–${r0(w.tmax)}°C</span>` +
-          (w.rainProb != null
-            ? `<span class="badge ${w.rainProb >= state.thr ? "warn" : ""}">Mưa ${Math.round(w.rainProb)}%</span>`
-            : "") +
           `<span class="badge">Mặt trời mọc ${hhmm(w.sunrise)}</span>`;
       }
       if (meal != null) h += `<span class="hint">Ăn uống dự trù ${vnd(meal)}</span>`;
@@ -265,9 +270,7 @@ export function renderPlan(ctx: RenderContext): void {
     h +=
       `<div class="card item${state.done[kk] ? " done" : ""}${p.o ? " opt" : ""}">` +
       `<input type="checkbox" data-k="${esc(kk)}" ${state.done[kk] ? "checked" : ""} aria-label="Xong">` +
-      `<div><div class="t">${esc(p.a)}${
-        useB && rp != null ? ` <span class="badge warn">Mưa ${Math.round(rp)}%</span>` : ""
-      }${p.o ? ' <span class="badge">Tuỳ chọn</span>' : ""}</div>` +
+      `<div><div class="t">${esc(p.a)}${p.o ? ' <span class="badge">Tuỳ chọn</span>' : ""}</div>` +
       `<div class="time">${p.b}${p.t ? ` · ${p.t}` : ""} · ${p.c}${p.m ? ` · ${vnd(p.m)}` : ""}</div></div>` +
       '<div class="meta">' +
       (p.p ? `<a href="${mapUrl(p.p)}" target="_blank" rel="noopener">${esc(p.p)}</a>` : "") +
@@ -379,8 +382,38 @@ export function renderOutfit(ctx: RenderContext): void {
   });
 }
 
+const SLOT_ORDER: TimeSlot[] = ["Sáng", "Trưa", "Chiều", "Tối"];
+
+function slotRows(days: DailyWeather[] | null, dayNum: number): string {
+  let h = "";
+  for (const b of SLOT_ORDER) {
+    const info = slotRainInfo(days, dayNum, b);
+    if (!info) continue;
+    const [label, cls] = rainLevel(info);
+    h += `<div class="row"><span>Mưa ${b.toLowerCase()}</span><span><span class="badge ${cls}">${label}</span>${
+      info.mm != null ? ` ${info.mm.toFixed(1)} mm` : ` ${Math.round(info.prob)}%`
+    }</span></div>`;
+  }
+  return h;
+}
+
+function rainSummary(days: DailyWeather[] | null, dayNum: number): string {
+  const rows = SLOT_ORDER.map((b) => ({ b, info: slotRainInfo(days, dayNum, b) })).filter(
+    (x): x is { b: TimeSlot; info: NonNullable<ReturnType<typeof slotRainInfo>> } => x.info != null,
+  );
+  if (!rows.length) return "";
+  const wet = rows.filter((x) => rainLevel(x.info)[1] === "warn");
+  if (!wet.length) return "Cả ngày ít khả năng mưa.";
+  const names = wet.map((x) => x.b.toLowerCase()).join(", ");
+  return `Mưa chủ yếu buổi ${names}.`;
+}
+
 function tipFor(d: DailyWeather, thr: number): string {
   const t: string[] = [];
+  if (d.hours) {
+    const s = rainSummary([d], Number(d.date.slice(8)));
+    if (s) t.push(s);
+  }
   if (d.rainProb != null && d.rainProb >= thr) {
     t.push("Khả năng mưa cao, xem Plan B cho mục ngoài trời.");
   } else if (d.rainProb != null && d.rainProb >= 35) {
@@ -412,9 +445,11 @@ export function renderWeather(ctx: RenderContext): void {
       h +=
         `<div class="card"><b>${f.day}</b> <span class="hint">${f.dow}</span><div style="font-size:2rem;line-height:1.2">${weatherIcon(d.code)}</div>` +
         `<div><b style="font-size:1.15rem">${r0(d.tmax)}°</b> <span class="hint">/ ${r0(d.tmin)}°C</span></div>` +
-        `<div class="row"><span>${weather.forecast ? "Xác suất mưa" : "Ngày có mưa"}</span><span>${
-          d.rainProb == null ? "–" : `${Math.round(d.rainProb)}%`
-        }</span></div>` +
+        (d.hours
+          ? slotRows(weather.days, Number(d.date.slice(8)))
+          : `<div class="row"><span>Ngày có mưa</span><span>${
+              d.rainProb == null ? "–" : `${Math.round(d.rainProb)}%`
+            }</span></div>`) +
         `<div class="row"><span>Lượng mưa</span><span>${
           d.rain == null ? "–" : `${d.rain.toFixed(1)} mm`
         }</span></div>` +

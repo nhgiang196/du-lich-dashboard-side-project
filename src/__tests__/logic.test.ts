@@ -3,7 +3,8 @@ import { BOOK } from "../data/tripData";
 import { contrast, suggestFor, vis } from "../logic/color";
 import { BUDGET_MAX, calculateCostSummary, dayMeals, lineActive } from "../logic/cost";
 import { buildPlan, queryWithCity, routeUrl } from "../logic/plan";
-import { applyWeatherCache, cloudLabel, cloudScore, slotRain } from "../logic/weather";
+import { applyWeatherCache, cloudLabel, cloudScore, mergeRainModels, slotRain } from "../logic/weather";
+import { shouldShowInstallHint } from "../ui/installHint";
 import {
   buildSyncUrl,
   createDefaultState,
@@ -286,5 +287,34 @@ describe("Đà Lạt Trip Logic", () => {
     expect(merged.val.m19).toBe(450_000);
     expect(merged.variant).toBe("swap");
     expect(merged.thr).toBe(55);
+  });
+});
+
+describe("installHint", () => {
+  const safari = {
+    userAgent:
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+    platform: "iPhone",
+    maxTouchPoints: 5,
+    standalone: false,
+  };
+  it("shows on iOS Safari first visit", () => {
+    expect(shouldShowInstallHint(safari, false)).toBe(true);
+  });
+  it("hides when seen, standalone, or non-Safari", () => {
+    expect(shouldShowInstallHint(safari, true)).toBe(false);
+    expect(shouldShowInstallHint({ ...safari, standalone: true }, false)).toBe(false);
+    expect(shouldShowInstallHint({ ...safari, userAgent: `${safari.userAgent} CriOS/120` }, false)).toBe(false);
+    expect(shouldShowInstallHint({ ...safari, userAgent: "Windows Chrome", platform: "Win32" }, false)).toBe(false);
+  });
+});
+
+describe("rain consensus", () => {
+  it("merges models by median and agreement", () => {
+    const r = mergeRainModels(["t0", "t1"], [[0, 1], [0, 3], [0.5, 0]]);
+    expect(r.t0.mm).toBe(0);
+    expect(r.t0.pp).toBe(33);
+    expect(r.t1.mm).toBe(1);
+    expect(r.t1.pp).toBe(67);
   });
 });

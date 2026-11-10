@@ -79,6 +79,8 @@ export interface HourlyWeather {
   chigh: number;
   wind: number;
   pp: number;
+  /** Lượng mưa gộp (median các model), mm/giờ */
+  mm?: number;
 }
 
 export interface DailyWeather {

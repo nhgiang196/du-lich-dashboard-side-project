@@ -1,3 +1,4 @@
+import { setupInstallHint } from "./ui/installHint";
 import "./style.css";
 import { TABS } from "./data/tripData";
 import {
@@ -416,6 +417,7 @@ function bootstrap(): void {
   const hs = location.hash.slice(1) as TabId;
   show(/^(plan|weather|outfit|book|cost|alt|todo)$/.test(hs) ? hs : "plan");
 
+  setupInstallHint();
   registerServiceWorker();
   void refreshWeather();
 }
