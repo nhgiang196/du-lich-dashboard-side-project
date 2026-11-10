@@ -1,7 +1,7 @@
 import { LINES } from "../data/tripData";
 import type { CostGroup, CostLine, TripState } from "../types";
 
-export const BUDGET_MAX = 8_000_000;
+export const BUDGET_MAX = 6_000_000;
 
 export function lineVal(l: CostLine, state: TripState): number | null {
   return state.val[l.id] != null ? state.val[l.id] : l.v;

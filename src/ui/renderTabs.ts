@@ -324,7 +324,7 @@ export function renderOutfit(ctx: RenderContext): void {
   if (!container) return;
 
   let h =
-    '<p class="hint">Style clean, chill, retro kiểu Đà Lạt. Cột "Bạn" bám theo đồ bạn đã liệt kê, cột "Người đi cùng" là gợi ý chung. Có dự báo thì trang tự thêm nhắc nhở mưa và lạnh.</p>';
+    '<p class="hint">Style clean, chill, retro kiểu Đà Lạt. Cột "Bạn" tức là Anh nha. cột "Người đi cùng" là gợi ý chung cho em 👌😍</p>';
   h +=
     '<div class="card"><b>Bảng màu</b><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">' +
     PALETTE.map(
@@ -558,9 +558,7 @@ export function renderCost(ctx: RenderContext): void {
     (missing.length ? `<div class="err hint">Chưa gồm: ${esc(missing.join("; "))}.</div>` : "") +
     `<div class="bar ${total > budget ? "over" : ""}"><i style="width:${pct}%"></i></div>` +
     `<div class="row"><span>Ngân sách tối đa</span><span>${vnd(budget)}</span></div>` +
-    `<div class="row"><span>${total > budget ? "Vượt" : "Còn lại"}</span><span>${vnd(Math.abs(budget - total))}</span></div>` +
-    `<div class="row"><span>Mỗi người</span><span>${vnd(perPerson)}</span></div></div>`;
-
+    `<div class="row"><span>${total > budget ? "Vượt" : "Còn lại"}</span><span>${vnd(Math.abs(budget - total))}</span></div>` 
   container.innerHTML = h;
 
   container.querySelectorAll<HTMLInputElement>("input[data-v]").forEach((inp) => {
