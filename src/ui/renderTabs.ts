@@ -390,9 +390,9 @@ function slotRows(days: DailyWeather[] | null, dayNum: number): string {
     const info = slotRainInfo(days, dayNum, b);
     if (!info) continue;
     const [label, cls] = rainLevel(info);
-    h += `<div class="row"><span>Mưa ${b.toLowerCase()}</span><span><span class="badge ${cls}">${label}</span>${
-      info.mm != null ? ` ${info.mm.toFixed(1)} mm` : ` ${Math.round(info.prob)}%`
-    }</span></div>`;
+    h += `<div class="row slot"><span>${b}</span><span class="v"><span class="badge ${cls}">${label}</span><span class="n">${
+      info.mm != null ? `${info.mm.toFixed(1)} mm` : `${Math.round(info.prob)}%`
+    }</span></span></div>`;
   }
   return h;
 }

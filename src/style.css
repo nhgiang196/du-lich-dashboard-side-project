@@ -243,7 +243,7 @@ button.on {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
   gap: 10px;
 }
 
@@ -259,6 +259,30 @@ button.on {
   color: var(--muted);
   font-size: 0.86rem;
   margin-top: 3px;
+}
+
+.row > * {
+  min-width: 0;
+}
+
+.row.slot {
+  align-items: center;
+}
+
+.row.slot .v {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px 6px;
+  color: var(--text);
+  text-align: right;
+}
+
+.row.slot .n {
+  min-width: 3.6em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .day {

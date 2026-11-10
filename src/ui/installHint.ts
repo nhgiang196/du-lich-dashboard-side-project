@@ -34,22 +34,21 @@ function currentEnv(): HintEnv {
 
 export function setupInstallHint(): void {
   const panel = document.getElementById("install-hint");
-  const openBtn = document.getElementById("toggle-install") as HTMLButtonElement | null;
+  const openBtn = document.getElementById("toggle-install");
   if (!panel) return;
 
-  const env = currentEnv();
-  const eligible = isIosSafari(env) && !env.standalone;
-  if (openBtn) openBtn.hidden = !eligible;
-  if (!eligible) return;
-
-  const close = () => {
-    panel.hidden = true;
-    saveInstallHintSeen();
+  const setOpen = (open: boolean) => {
+    panel.hidden = !open;
+    openBtn?.setAttribute("aria-expanded", String(open));
+    if (open) panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
   };
-  panel.querySelector<HTMLButtonElement>("[data-install-close]")?.addEventListener("click", close);
-  openBtn?.addEventListener("click", () => {
-    panel.hidden = !panel.hidden;
-  });
 
-  if (shouldShowInstallHint(env, loadInstallHintSeen())) panel.hidden = false;
+  panel.querySelector("[data-install-close]")?.addEventListener("click", () => {
+    setOpen(false);
+    saveInstallHintSeen();
+  });
+  // Nút luôn hoạt động trên mọi thiết bị; chỉ tự bật bảng ở lần đầu trên iOS Safari
+  openBtn?.addEventListener("click", () => setOpen(panel.hidden));
+
+  if (shouldShowInstallHint(currentEnv(), loadInstallHintSeen())) setOpen(true);
 }
