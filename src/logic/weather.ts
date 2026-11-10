@@ -176,8 +176,9 @@ async function loadRainConsensus(): Promise<Record<string, { mm: number; pp: num
     const j = await fetchJson<RainModelsResponse>(u);
     const h = j.hourly;
     if (!h || !h.time) return null;
-    const series = RAIN_MODELS.map((m) => h[`precipitation_${m}`] as (number | null)[] | undefined)
-      .filter((x): x is (number | null)[] => Array.isArray(x));
+    const series = RAIN_MODELS.map(
+      (m) => h[`precipitation_${m}`] as (number | null)[] | undefined,
+    ).filter((x): x is (number | null)[] => Array.isArray(x));
     if (series.length < 2) return null;
     return mergeRainModels(h.time as string[], series);
   } catch {

@@ -3,8 +3,13 @@ import { BOOK } from "../data/tripData";
 import { contrast, suggestFor, vis } from "../logic/color";
 import { BUDGET_MAX, calculateCostSummary, dayMeals, lineActive } from "../logic/cost";
 import { buildPlan, queryWithCity, routeUrl } from "../logic/plan";
-import { applyWeatherCache, cloudLabel, cloudScore, mergeRainModels, slotRain } from "../logic/weather";
-import { shouldShowInstallHint } from "../ui/installHint";
+import {
+  applyWeatherCache,
+  cloudLabel,
+  cloudScore,
+  mergeRainModels,
+  slotRain,
+} from "../logic/weather";
 import {
   buildSyncUrl,
   createDefaultState,
@@ -15,6 +20,7 @@ import {
   saveWeatherCache,
 } from "../state/storage";
 import type { CostLine, DailyWeather, WeatherState } from "../types";
+import { shouldShowInstallHint } from "../ui/installHint";
 
 const memoryStore = new Map<string, string>();
 const mockLocalStorage = {
@@ -304,14 +310,25 @@ describe("installHint", () => {
   it("hides when seen, standalone, or non-Safari", () => {
     expect(shouldShowInstallHint(safari, true)).toBe(false);
     expect(shouldShowInstallHint({ ...safari, standalone: true }, false)).toBe(false);
-    expect(shouldShowInstallHint({ ...safari, userAgent: `${safari.userAgent} CriOS/120` }, false)).toBe(false);
-    expect(shouldShowInstallHint({ ...safari, userAgent: "Windows Chrome", platform: "Win32" }, false)).toBe(false);
+    expect(
+      shouldShowInstallHint({ ...safari, userAgent: `${safari.userAgent} CriOS/120` }, false),
+    ).toBe(false);
+    expect(
+      shouldShowInstallHint({ ...safari, userAgent: "Windows Chrome", platform: "Win32" }, false),
+    ).toBe(false);
   });
 });
 
 describe("rain consensus", () => {
   it("merges models by median and agreement", () => {
-    const r = mergeRainModels(["t0", "t1"], [[0, 1], [0, 3], [0.5, 0]]);
+    const r = mergeRainModels(
+      ["t0", "t1"],
+      [
+        [0, 1],
+        [0, 3],
+        [0.5, 0],
+      ],
+    );
     expect(r.t0.mm).toBe(0);
     expect(r.t0.pp).toBe(33);
     expect(r.t1.mm).toBe(1);

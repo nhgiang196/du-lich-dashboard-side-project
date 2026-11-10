@@ -7,7 +7,9 @@ export interface HintEnv {
   standalone: boolean;
 }
 
-export function isIosSafari(env: Pick<HintEnv, "userAgent" | "platform" | "maxTouchPoints">): boolean {
+export function isIosSafari(
+  env: Pick<HintEnv, "userAgent" | "platform" | "maxTouchPoints">,
+): boolean {
   const ua = env.userAgent;
   const iosDevice =
     /iPhone|iPad|iPod/.test(ua) || (env.platform === "MacIntel" && env.maxTouchPoints > 1);
