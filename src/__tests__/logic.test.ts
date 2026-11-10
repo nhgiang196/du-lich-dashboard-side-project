@@ -41,13 +41,13 @@ describe("Đà Lạt Trip Logic", () => {
     memoryStore.clear();
   });
 
-  it("calculates baseline trip cost and per-person split (6,152,000 VND / 2 = 3,076,000 VND)", () => {
+  it("calculates baseline trip cost and per-person split (5,872,000 VND / 2 = 2,936,000 VND)", () => {
     const state = createDefaultState();
     const summary = calculateCostSummary(state);
-    expect(summary.total).toBe(6_152_000);
-    expect(summary.perPerson).toBe(3_076_000);
+    expect(summary.total).toBe(5_872_000);
+    expect(summary.perPerson).toBe(2_936_000);
     expect(summary.byGroup["Đã đặt"]).toBe(2_992_000);
-    expect(summary.byGroup["Ước tính"]).toBe(960_000);
+    expect(summary.byGroup["Ước tính"]).toBe(680_000);
     expect(summary.byGroup["Ăn uống"]).toBe(2_200_000);
     expect(summary.missing).toContain("Ăn uống và mua đặc sản 19/11");
     expect(dayMeals(17, state)).toBe(750_000);
@@ -59,8 +59,8 @@ describe("Đà Lạt Trip Logic", () => {
     state.val.m19 = 648_000;
 
     const summary = calculateCostSummary(state);
-    expect(summary.total).toBe(7_150_000);
-    expect(summary.perPerson).toBe(3_575_000);
+    expect(summary.total).toBe(6_870_000);
+    expect(summary.perPerson).toBe(3_435_000);
     expect(summary.missing).toHaveLength(0);
     expect(dayMeals(19, state)).toBe(648_000);
 
